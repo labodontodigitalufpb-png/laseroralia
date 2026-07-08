@@ -43,8 +43,8 @@ button { cursor: pointer; }
 
 .brand { display: flex; gap: 14px; align-items: center; }
 .brand-logo {
-  width: 384px;
-  height: 384px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
   border-radius: 8px;
   background: #fff;
@@ -121,7 +121,7 @@ input, select {
 
 .reference-strip {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin: 0 0 18px;
 }
@@ -155,6 +155,14 @@ input, select {
   padding: 18px;
 }
 .section-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+.protocol-tools {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(180px, .82fr);
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+.protocol-search { min-width: 0; }
 
 .condition-list, .service-list, .chat-log { display: grid; gap: 10px; }
 .condition-card, .device-card, .service-card, .learning-card {
@@ -333,8 +341,8 @@ output {
     gap: 10px;
   }
   .brand-logo {
-    width: min(56vw, 570px);
-    height: min(56vw, 570px);
+    width: 104px;
+    height: 104px;
   }
   .nav-list {
     display: flex;
@@ -357,15 +365,16 @@ output {
   .top-actions { align-items: stretch; }
   .search, .top-actions select { width: 100%; }
   .two-col, .three-col { grid-template-columns: 1fr; }
-  .reference-strip { grid-template-columns: 1fr; }
+  .reference-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .references-panel { grid-template-columns: 1fr; }
+  .protocol-tools { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 620px) {
   .main { padding: 14px; }
   .brand-logo {
-    width: min(64vw, 510px);
-    height: min(64vw, 510px);
+    width: 96px;
+    height: 96px;
   }
   .brand strong { font-size: 1.18rem; }
   .brand small { max-width: 260px; }

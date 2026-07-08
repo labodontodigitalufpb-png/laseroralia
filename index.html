@@ -67,6 +67,9 @@
           <article>
             <img src="assets/labodigit.jpg" alt="LABODIGIT Laboratorio de Odontologia Digital PPGO UFPB" />
           </article>
+          <article>
+            <img src="assets/pet-telestomatologia-unifal-mg.jpeg" alt="PET Telestomatologia UNIFAL-MG" />
+          </article>
         </section>
 
         <section class="view active" id="protocolsView" aria-labelledby="pageTitle">
@@ -83,6 +86,23 @@
                   <option value="dtm">DTM e musculoesqueletico</option>
                 </select>
               </div>
+              <form class="protocol-tools" id="protocolSearchForm">
+                <label class="protocol-search">Buscar protocolo
+                  <input id="protocolSearch" type="search" placeholder="Lesao, diagnostico, objetivo..." />
+                </label>
+                <button class="secondary" type="submit">Buscar</button>
+                <label>Preferencia para lesoes
+                  <select id="lesionPreference">
+                    <option value="all">Todas as lesoes</option>
+                    <option value="ulcerativas">Ulcerativas e mucosa</option>
+                    <option value="autoimunes">Autoimunes</option>
+                    <option value="infecciosas">Infecciosas</option>
+                    <option value="vasculares">Vasculares</option>
+                    <option value="cirurgicas">Cirurgicas/tecidos moles</option>
+                    <option value="dor">Dor e neurossensorial</option>
+                  </select>
+                </label>
+              </form>
               <div class="condition-list" id="conditionList"></div>
             </section>
 

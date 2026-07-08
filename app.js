@@ -539,16 +539,31 @@ function bindNavigation() {
 }
 
 function bindSearchAndFilters() {
-  $("#globalSearch").addEventListener("input", renderProtocols);
+  $("#globalSearch").addEventListener("input", () => {
+    $("#protocolSearch").value = $("#globalSearch").value;
+    renderProtocols();
+  });
+  $("#protocolSearch").addEventListener("input", () => {
+    $("#globalSearch").value = $("#protocolSearch").value;
+    renderProtocols();
+  });
+  $("#protocolSearchForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    renderProtocols();
+  });
   $("#conditionFilter").addEventListener("change", renderProtocols);
+  $("#lesionPreference").addEventListener("change", renderProtocols);
 }
 
 function renderProtocols() {
-  const term = $("#globalSearch").value.trim().toLowerCase();
+  const term = ($("#protocolSearch").value || $("#globalSearch").value).trim().toLowerCase();
   const category = $("#conditionFilter").value;
+  const lesionPreference = $("#lesionPreference").value;
   const filtered = protocols.filter((protocol) => {
     const haystack = [protocol.name, protocol.summary, protocol.category, ...protocol.keywords, ...protocol.goals].join(" ").toLowerCase();
-    return (category === "all" || protocol.category === category) && (!term || haystack.includes(term));
+    return (category === "all" || protocol.category === category)
+      && matchesLesionPreference(protocol, lesionPreference)
+      && (!term || haystack.includes(term));
   });
   $("#conditionList").innerHTML = filtered.map((protocol) => `
     <button class="condition-card ${protocol.id === selectedProtocol.id ? "active" : ""}" data-id="${protocol.id}" type="button">
@@ -567,6 +582,28 @@ function renderProtocols() {
       renderProtocolDetail(selectedProtocol);
     });
   });
+}
+
+function matchesLesionPreference(protocol, preference) {
+  if (preference === "all") return true;
+  const haystack = [
+    protocol.id,
+    protocol.name,
+    protocol.summary,
+    protocol.manifestations,
+    protocol.category,
+    ...protocol.keywords,
+    ...protocol.goals
+  ].join(" ").toLowerCase();
+  const preferences = {
+    ulcerativas: ["ulcera", "ulceracao", "mucosite", "afta", "liquen", "mucosa", "erosivo"],
+    autoimunes: ["autoimune", "liquen", "penfigo", "penfigoide", "descamativa"],
+    infecciosas: ["herpes", "hsv", "candidose", "infecc", "microbiologico", "pdt", "apdt"],
+    vasculares: ["vascular", "hemangioma", "venosa", "lago venoso", "sangramento"],
+    cirurgicas: ["excisao", "cirurg", "fibroma", "mucocele", "papiloma", "tecidos moles", "leucoplasia"],
+    dor: ["dor", "parestesia", "neurossensorial", "dtm", "miofascial", "hipersensibilidade", "trismo"]
+  };
+  return preferences[preference].some((keyword) => haystack.includes(keyword));
 }
 
 function renderProtocolDetail(protocol) {
