@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f766e" />
+    <title>Laser Oral Aid</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegacao principal">
+        <div class="brand">
+          <img class="brand-logo" src="assets/laser-oral-aid.png" alt="Laser Oral Aid" />
+          <div>
+            <strong>Laser Oral Aid</strong>
+            <small>Tecnologia a laser. Saude que transforma.</small>
+          </div>
+        </div>
+
+        <nav class="nav-list" id="navList">
+          <button class="nav-item active" data-view="protocols" type="button">Protocolos</button>
+          <button class="nav-item" data-view="simulator" type="button">Simulador</button>
+          <button class="nav-item" data-view="calculator" type="button">Calculadoras</button>
+          <button class="nav-item" data-view="devices" type="button">Equipamentos</button>
+          <button class="nav-item" data-view="map" type="button">Rede de atendimento</button>
+          <button class="nav-item" data-view="learning" type="button">Ensino</button>
+          <button class="nav-item" data-view="assistant" type="button">Assistente IA</button>
+        </nav>
+
+        <div class="status-panel">
+          <span class="status-dot"></span>
+          <div>
+            <strong id="syncStatus">Offline pronto</strong>
+            <small>Protocolos salvos neste dispositivo</small>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Odontologia baseada em evidencias</p>
+            <h1 id="pageTitle">Protocolos clinicos</h1>
+          </div>
+          <div class="top-actions">
+            <label class="search">
+              <span>Buscar</span>
+              <input id="globalSearch" type="search" placeholder="Doenca, diagnostico, objetivo..." />
+            </label>
+            <select id="deviceSelect" aria-label="Equipamento selecionado"></select>
+          </div>
+        </header>
+
+        <section class="clinical-warning" role="note">
+          Ferramenta de apoio a decisao. A indicacao, ajuste de dose e execucao do tratamento sao responsabilidade do cirurgiao-dentista, com validacao clinica, treinamento, biosseguranca e legislacao local.
+        </section>
+
+        <section class="reference-strip" aria-label="Referencias institucionais">
+          <article>
+            <img src="assets/ufal.jpg" alt="Universidade Federal de Alagoas" />
+          </article>
+          <article>
+            <img src="assets/cesmac.jpg" alt="CESMAC" />
+          </article>
+          <article>
+            <img src="assets/labodigit.jpg" alt="LABODIGIT Laboratorio de Odontologia Digital PPGO UFPB" />
+          </article>
+        </section>
+
+        <section class="view active" id="protocolsView" aria-labelledby="pageTitle">
+          <div class="layout two-col">
+            <section class="panel">
+              <div class="section-heading">
+                <h2>Biblioteca de protocolos</h2>
+                <select id="conditionFilter" aria-label="Filtrar por area">
+                  <option value="all">Todas as areas</option>
+                  <option value="mucosa">Mucosa oral</option>
+                  <option value="dor">Dor e neurossensorial</option>
+                  <option value="periodonto">Periodonto e implantes</option>
+                  <option value="cirurgia">Cirurgia e pos-operatorio</option>
+                  <option value="dtm">DTM e musculoesqueletico</option>
+                </select>
+              </div>
+              <div class="condition-list" id="conditionList"></div>
+            </section>
+
+            <article class="panel detail-panel" id="protocolDetail"></article>
+          </div>
+        </section>
+
+        <section class="view" id="simulatorView">
+          <div class="layout two-col">
+            <form class="panel form-grid" id="simulatorForm">
+              <h2>Simulador inteligente de protocolos</h2>
+              <label>Diagnostico ou hipotese
+                <input name="diagnosis" list="diagnosisList" placeholder="Ex.: mucosite oral" required />
+              </label>
+              <datalist id="diagnosisList"></datalist>
+              <label>Objetivo terapeutico
+                <select name="goal">
+                  <option>Analgesia</option>
+                  <option>Reparo tecidual</option>
+                  <option>Reducao da inflamacao</option>
+                  <option>Descontaminacao</option>
+                  <option>Hemostasia</option>
+                  <option>Excisao cirurgica</option>
+                </select>
+              </label>
+              <label>Tipo de laser
+                <select name="laserType">
+                  <option value="low">Baixa potencia / fotobiomodulacao</option>
+                  <option value="high">Alta potencia / cirurgico</option>
+                </select>
+              </label>
+              <label>Idade do paciente
+                <input name="age" type="number" min="0" max="120" value="42" />
+              </label>
+              <label>Localizacao anatomica
+                <input name="site" placeholder="Ex.: mucosa jugal, lingua, peri-implantar" />
+              </label>
+              <label>Area aproximada (cm2)
+                <input name="area" type="number" min="0.05" max="100" step="0.05" value="1.0" />
+              </label>
+              <label>Fase do caso
+                <select name="phase">
+                  <option>Aguda</option>
+                  <option>Subaguda</option>
+                  <option>Cronica</option>
+                  <option>Preventiva</option>
+                  <option>Pos-operatoria</option>
+                </select>
+              </label>
+              <button class="primary" type="submit">Gerar protocolo</button>
+            </form>
+            <article class="panel detail-panel" id="simulatorResult"></article>
+          </div>
+        </section>
+
+        <section class="view" id="calculatorView">
+          <div class="layout three-col">
+            <form class="panel calc" id="energyCalc">
+              <h2>Tempo por ponto</h2>
+              <label>Energia desejada (J)<input name="energy" type="number" step="0.1" value="4" /></label>
+              <label>Potencia (W)<input name="power" type="number" step="0.01" value="0.1" /></label>
+              <output></output>
+            </form>
+            <form class="panel calc" id="fluenceCalc">
+              <h2>Densidade de energia</h2>
+              <label>Energia total (J)<input name="energy" type="number" step="0.1" value="4" /></label>
+              <label>Area irradiada (cm2)<input name="area" type="number" step="0.01" value="0.04" /></label>
+              <output></output>
+            </form>
+            <form class="panel calc" id="pointsCalc">
+              <h2>Numero de pontos</h2>
+              <label>Area da lesao (cm2)<input name="area" type="number" step="0.1" value="1" /></label>
+              <label>Area por ponto (cm2)<input name="spot" type="number" step="0.01" value="0.04" /></label>
+              <output></output>
+            </form>
+          </div>
+          <div class="panel alerts" id="parameterAlerts"></div>
+        </section>
+
+        <section class="view" id="devicesView">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>Cadastro de equipamentos</h2>
+              <span id="deviceCount"></span>
+            </div>
+            <div class="device-grid" id="deviceGrid"></div>
+          </div>
+        </section>
+
+        <section class="view" id="mapView">
+          <div class="layout two-col">
+            <section class="panel">
+              <div class="section-heading">
+                <h2>Unidades proximas</h2>
+                <button class="secondary" id="locateBtn" type="button">Usar localizacao</button>
+              </div>
+              <div class="filters">
+                <label><input type="checkbox" value="SUS" checked /> SUS</label>
+                <label><input type="checkbox" value="Privado" checked /> Privado</label>
+                <label><input type="checkbox" value="Laser" checked /> Laserterapia</label>
+              </div>
+              <div class="service-list" id="serviceList"></div>
+            </section>
+            <section class="map-panel" id="mapPanel">
+              <div class="map-pin primary-pin"></div>
+              <div class="map-pin pin-a"></div>
+              <div class="map-pin pin-b"></div>
+              <div class="map-pin pin-c"></div>
+              <div class="map-caption">Mapa demonstrativo com rota integrada via link externo</div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="learningView">
+          <section class="panel references-panel">
+            <div>
+              <p class="eyebrow">Referencias e apoio institucional</p>
+              <h2>Laser Oral Aid</h2>
+              <p>Plataforma educacional e clinica vinculada a pesquisa, ensino e apoio a decisao em laserterapia odontologica.</p>
+            </div>
+            <img src="assets/laser-oral-aid.png" alt="Laser Oral Aid" />
+          </section>
+          <div class="layout three-col" id="learningGrid"></div>
+        </section>
+
+        <section class="view" id="assistantView">
+          <div class="layout two-col">
+            <section class="panel chat-panel">
+              <h2>Assistente especializado</h2>
+              <div class="chat-log" id="chatLog"></div>
+              <form class="chat-form" id="chatForm">
+                <input name="message" placeholder="Pergunte sobre protocolo, seguranca, dose..." autocomplete="off" />
+                <button class="primary" type="submit">Enviar</button>
+              </form>
+            </section>
+            <aside class="panel">
+              <h2>Escopo do assistente</h2>
+              <ul class="clean-list">
+                <li>Explica fundamentos de fotobiomodulacao e laser cirurgico.</li>
+                <li>Sugere parametros compativeis com equipamento cadastrado.</li>
+                <li>Aponta contraindicações, alertas e referencias.</li>
+                <li>Reforca que a decisao final e do profissional habilitado.</li>
+              </ul>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>

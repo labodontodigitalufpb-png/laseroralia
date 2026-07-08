@@ -1,0 +1,24 @@
+{
+  "name": "Laser Oral Aid",
+  "short_name": "LaserAid",
+  "description": "Apoio clinico para laserterapia odontologica, protocolos, equipamentos, calculadoras e rede de atendimento.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f6f8f7",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/laser-oral-aid.png",
+      "sizes": "700x700",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
+  
