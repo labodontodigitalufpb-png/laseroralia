@@ -5,9 +5,11 @@ const ASSETS = [
   "./styles.css",
   "./app.js",
   "./manifest.webmanifest",
-                  "./assets/ufal.jpg",
+  "./icon.svg",
+  "./assets/ufal.jpg",
   "./assets/cesmac.jpg",
   "./assets/labodigit.jpg",
+  "./assets/pet-telestomatologia-unifal-mg.jpeg",
   "./assets/laser-oral-aid.png"
 ];
 
