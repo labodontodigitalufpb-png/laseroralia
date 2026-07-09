@@ -900,8 +900,12 @@ function bindNavigation() {
 function activateView(view, titles) {
   $$(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === view));
   $$(".view").forEach((viewNode) => viewNode.classList.remove("active"));
-  $(`#${view}View`).classList.add("active");
+  const activeView = $(`#${view}View`);
+  activeView.classList.add("active");
   $("#pageTitle").textContent = titles[view];
+  if (matchMedia("(max-width: 980px)").matches) {
+    activeView.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 function bindSearchAndFilters() {
