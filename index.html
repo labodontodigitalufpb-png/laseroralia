@@ -10,17 +10,19 @@
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar" aria-label="Navegacao principal">
+      <aside class="sidebar" aria-label="Navegação principal">
         <div class="brand">
           <img class="brand-logo" src="assets/laser-oral-aid.png" alt="Laser Oral Aid" />
           <div>
             <strong>Laser Oral Aid</strong>
-            <small>Tecnologia a laser. Saude que transforma.</small>
+            <small>Tecnologia a laser. Saúde que transforma.</small>
           </div>
         </div>
 
         <nav class="nav-list" id="navList">
-          <button class="nav-item active" data-view="protocols" type="button">Protocolos</button>
+          <button class="nav-item active" data-view="home" type="button">Início</button>
+          <button class="nav-item" data-view="patients" type="button">Acesso</button>
+          <button class="nav-item" data-view="protocols" type="button">Protocolos</button>
           <button class="nav-item" data-view="simulator" type="button">Simulador</button>
           <button class="nav-item" data-view="calculator" type="button">Calculadoras</button>
           <button class="nav-item" data-view="devices" type="button">Equipamentos</button>
@@ -40,65 +42,126 @@
 
       <main class="main">
         <header class="topbar">
-          <div>
-            <p class="eyebrow">Odontologia baseada em evidencias</p>
-            <h1 id="pageTitle">Protocolos clinicos</h1>
+          <div class="topbar-title">
+            <div>
+              <p class="eyebrow">Odontologia baseada em evidências</p>
+              <h1 id="pageTitle">Laser Oral Aid</h1>
+            </div>
+            <div class="top-logos" aria-label="Universidades parceiras">
+              <img src="assets/ufal.jpg" alt="Universidade Federal de Alagoas" />
+              <img src="assets/cesmac.jpg" alt="CESMAC" />
+              <img src="assets/labodigit.jpg" alt="LABODIGIT Laboratorio de Odontologia Digital PPGO UFPB" />
+              <img src="assets/pet-telestomatologia-unifal-mg.jpeg" alt="PET Telestomatologia UNIFAL-MG" />
+            </div>
           </div>
           <div class="top-actions">
             <label class="search">
               <span>Buscar</span>
-              <input id="globalSearch" type="search" placeholder="Doenca, diagnostico, objetivo..." />
+              <input id="globalSearch" type="search" placeholder="Doença, diagnóstico, objetivo..." />
             </label>
             <select id="deviceSelect" aria-label="Equipamento selecionado"></select>
           </div>
         </header>
 
         <section class="clinical-warning" role="note">
-          Ferramenta de apoio a decisao. A indicacao, ajuste de dose e execucao do tratamento sao responsabilidade do cirurgiao-dentista, com validacao clinica, treinamento, biosseguranca e legislacao local.
+          Ferramenta de apoio à decisão. A indicação, ajuste de dose e execução do tratamento são responsabilidade do cirurgião-dentista, com validação clínica, treinamento, biossegurança e legislação local.
         </section>
 
-        <section class="reference-strip" aria-label="Referencias institucionais">
+        <section class="app-summary" aria-label="Resumo do aplicativo">
           <article>
-            <img src="assets/ufal.jpg" alt="Universidade Federal de Alagoas" />
+            <span>Protocolos</span>
+            <strong id="summaryProtocolCount">0</strong>
           </article>
           <article>
-            <img src="assets/cesmac.jpg" alt="CESMAC" />
+            <span>Pacientes</span>
+            <strong id="summaryPatientCount">0</strong>
           </article>
           <article>
-            <img src="assets/labodigit.jpg" alt="LABODIGIT Laboratorio de Odontologia Digital PPGO UFPB" />
-          </article>
-          <article>
-            <img src="assets/pet-telestomatologia-unifal-mg.jpeg" alt="PET Telestomatologia UNIFAL-MG" />
+            <span>Na sua cidade</span>
+            <strong id="summaryCityCount">0</strong>
           </article>
         </section>
 
-        <section class="view active" id="protocolsView" aria-labelledby="pageTitle">
+        <section class="view active" id="homeView" aria-labelledby="pageTitle">
+          <section class="home-hero">
+            <div class="home-hero-copy">
+              <img class="home-app-logo" src="assets/laser-oral-aid.png" alt="Laser Oral Aid" />
+              <p class="eyebrow">Aplicativo de apoio em laserterapia odontológica</p>
+              <h2>Protocolos, acompanhamento e rede de cuidado em um só lugar.</h2>
+              <p>
+                O Laser Oral Aid reúne ferramentas para apoiar o ensino, a tomada de decisão clínica,
+                o cadastro de pacientes, o acompanhamento profissional e a localização de serviços com
+                potencial atuação em laserterapia.
+              </p>
+              <div class="home-actions">
+                <button class="primary home-jump" data-view-target="patients" type="button">Entrar no app</button>
+                <button class="secondary home-jump" data-view-target="protocols" type="button">Ver protocolos</button>
+              </div>
+            </div>
+
+            <div class="home-logo-panel" aria-label="Instituições parceiras">
+              <img src="assets/ufal.jpg" alt="Universidade Federal de Alagoas" />
+              <img src="assets/cesmac.jpg" alt="CESMAC" />
+              <img src="assets/labodigit.jpg" alt="LABODIGIT Laboratorio de Odontologia Digital PPGO UFPB" />
+              <img src="assets/pet-telestomatologia-unifal-mg.jpeg" alt="PET Telestomatologia UNIFAL-MG" />
+            </div>
+          </section>
+
+          <section class="home-features" aria-label="Funcionalidades do aplicativo">
+            <article>
+              <strong>Protocolos clínicos</strong>
+              <p>Biblioteca com parâmetros, objetivos terapêuticos, segurança, contraindicações e referências.</p>
+            </article>
+            <article>
+              <strong>Simulador inteligente</strong>
+              <p>Gera uma sugestão adaptada ao equipamento, área tratada, objetivo e fase do caso.</p>
+            </article>
+            <article>
+              <strong>Pacientes e profissionais</strong>
+              <p>Cadastro local com login, senha, edição pelo paciente e acompanhamento por cidade.</p>
+            </article>
+            <article>
+              <strong>Calculadoras clínicas</strong>
+              <p>Auxilia no cálculo de tempo por ponto, densidade de energia e número de pontos.</p>
+            </article>
+            <article>
+              <strong>Equipamentos</strong>
+              <p>Consulta modelos, comprimentos de onda, potência, modo de uso e limitações técnicas.</p>
+            </article>
+            <article>
+              <strong>Rede de atendimento</strong>
+              <p>Lista universidades, CEOs, hospitais e serviços de referência relacionados ao cuidado odontológico.</p>
+            </article>
+          </section>
+        </section>
+
+        <section class="view" id="protocolsView" aria-labelledby="pageTitle">
           <div class="layout two-col">
             <section class="panel">
               <div class="section-heading">
                 <h2>Biblioteca de protocolos</h2>
                 <select id="conditionFilter" aria-label="Filtrar por area">
-                  <option value="all">Todas as areas</option>
+                  <option value="all">Todas as áreas</option>
                   <option value="mucosa">Mucosa oral</option>
                   <option value="dor">Dor e neurossensorial</option>
                   <option value="periodonto">Periodonto e implantes</option>
-                  <option value="cirurgia">Cirurgia e pos-operatorio</option>
-                  <option value="dtm">DTM e musculoesqueletico</option>
+                  <option value="cirurgia">Cirurgia e pós-operatório</option>
+                  <option value="dtm">DTM e musculoesquelético</option>
                 </select>
               </div>
               <form class="protocol-tools" id="protocolSearchForm">
                 <label class="protocol-search">Buscar protocolo
-                  <input id="protocolSearch" type="search" placeholder="Lesao, diagnostico, objetivo..." />
+                  <input id="protocolSearch" type="search" placeholder="Lesão, diagnóstico, objetivo..." />
                 </label>
                 <button class="secondary" type="submit">Buscar</button>
-                <label>Preferencia para lesoes
+                <label class="preference-filter">Preferência para lesões
                   <select id="lesionPreference">
-                    <option value="all">Todas as lesoes</option>
+                    <option value="all">Todas as lesões</option>
                     <option value="ulcerativas">Ulcerativas e mucosa</option>
                     <option value="autoimunes">Autoimunes</option>
                     <option value="infecciosas">Infecciosas</option>
                     <option value="vasculares">Vasculares</option>
-                    <option value="cirurgicas">Cirurgicas/tecidos moles</option>
+                    <option value="cirurgicas">Cirúrgicas/tecidos moles</option>
                     <option value="dor">Dor e neurossensorial</option>
                   </select>
                 </label>
@@ -114,48 +177,178 @@
           <div class="layout two-col">
             <form class="panel form-grid" id="simulatorForm">
               <h2>Simulador inteligente de protocolos</h2>
-              <label>Diagnostico ou hipotese
+              <label>Diagnóstico ou hipótese
                 <input name="diagnosis" list="diagnosisList" placeholder="Ex.: mucosite oral" required />
               </label>
               <datalist id="diagnosisList"></datalist>
-              <label>Objetivo terapeutico
+              <label>Objetivo terapêutico
                 <select name="goal">
                   <option>Analgesia</option>
                   <option>Reparo tecidual</option>
-                  <option>Reducao da inflamacao</option>
-                  <option>Descontaminacao</option>
+                  <option>Redução da inflamação</option>
+                  <option>Descontaminação</option>
                   <option>Hemostasia</option>
-                  <option>Excisao cirurgica</option>
+                  <option>Excisão cirúrgica</option>
                 </select>
               </label>
               <label>Tipo de laser
                 <select name="laserType">
-                  <option value="low">Baixa potencia / fotobiomodulacao</option>
-                  <option value="high">Alta potencia / cirurgico</option>
+                  <option value="low">Baixa potência / fotobiomodulação</option>
+                  <option value="high">Alta potência / cirúrgico</option>
                 </select>
               </label>
               <label>Idade do paciente
                 <input name="age" type="number" min="0" max="120" value="42" />
               </label>
-              <label>Localizacao anatomica
+              <label>Localização anatômica
                 <input name="site" placeholder="Ex.: mucosa jugal, lingua, peri-implantar" />
               </label>
-              <label>Area aproximada (cm2)
+              <label>Área aproximada (cm2)
                 <input name="area" type="number" min="0.05" max="100" step="0.05" value="1.0" />
               </label>
               <label>Fase do caso
                 <select name="phase">
                   <option>Aguda</option>
                   <option>Subaguda</option>
-                  <option>Cronica</option>
+                  <option>Crônica</option>
                   <option>Preventiva</option>
-                  <option>Pos-operatoria</option>
+                  <option>Pós-operatória</option>
                 </select>
               </label>
               <button class="primary" type="submit">Gerar protocolo</button>
             </form>
             <article class="panel detail-panel" id="simulatorResult"></article>
           </div>
+        </section>
+
+        <section class="view" id="patientsView">
+          <section class="panel auth-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Acesso seguro local</p>
+                <h2>Entrar como paciente ou profissional</h2>
+              </div>
+              <div class="session-box" id="sessionBox"></div>
+            </div>
+            <div class="layout two-col auth-grid">
+              <form class="form-grid stacked-form" id="patientLoginForm">
+                <h3>Acesso do paciente</h3>
+                <label>Login
+                  <input name="username" autocomplete="username" placeholder="Login do paciente" required />
+                </label>
+                <label>Senha
+                  <input name="password" autocomplete="current-password" type="password" placeholder="Senha" required />
+                </label>
+                <button class="primary" type="submit">Entrar como paciente</button>
+              </form>
+              <form class="form-grid stacked-form" id="professionalLoginForm">
+                <h3>Acesso do profissional</h3>
+                <label>Login
+                  <input name="username" autocomplete="username" placeholder="Login profissional" required />
+                </label>
+                <label>Senha
+                  <input name="password" autocomplete="current-password" type="password" placeholder="Senha" required />
+                </label>
+                <button class="primary" type="submit">Entrar como profissional</button>
+              </form>
+            </div>
+            <p class="auth-message" id="authMessage"></p>
+          </section>
+
+          <div class="layout two-col patients-layout">
+            <section class="panel patient-card">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Módulo do paciente</p>
+                  <h2 id="patientFormTitle">Cadastro para acompanhamento</h2>
+                </div>
+              </div>
+              <form class="form-grid stacked-form" id="patientForm">
+                <input name="id" type="hidden" />
+                <label>Login do paciente
+                  <input name="username" autocomplete="username" placeholder="Ex.: maria.silva" required />
+                </label>
+                <label>Senha
+                  <input name="password" autocomplete="new-password" type="password" placeholder="Crie uma senha" required />
+                </label>
+                <label>Nome completo
+                  <input name="name" placeholder="Nome do paciente" required />
+                </label>
+                <label>Idade
+                  <input name="age" type="number" min="0" max="120" placeholder="Ex.: 42" required />
+                </label>
+                <label>Sexo
+                  <select name="sex" required>
+                    <option value="">Selecione</option>
+                    <option>Feminino</option>
+                    <option>Masculino</option>
+                    <option>Outro</option>
+                    <option>Prefere não informar</option>
+                  </select>
+                </label>
+                <label>Cidade
+                  <input name="city" placeholder="Cidade onde mora" required />
+                </label>
+                <label>Endereço
+                  <input name="address" placeholder="Rua, número, bairro" required />
+                </label>
+                <label>Onde realiza a laserterapia
+                  <input name="therapyPlace" placeholder="Clinica, CEO, universidade ou hospital" required />
+                </label>
+                <label>Observações de acompanhamento
+                  <input name="notes" placeholder="Ex.: mucosite, DTM, pós-operatório..." />
+                </label>
+                <div class="form-actions">
+                  <button class="primary" id="savePatientBtn" type="submit">Salvar paciente</button>
+                  <button class="secondary" id="cancelPatientEditBtn" type="button">Cancelar edição</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="panel professional-card">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Módulo do profissional</p>
+                  <h2>Cadastro profissional</h2>
+                </div>
+              </div>
+              <form class="form-grid stacked-form" id="professionalForm">
+                <label>Login profissional
+                  <input name="username" autocomplete="username" placeholder="Ex.: cro12345" required />
+                </label>
+                <label>Senha
+                  <input name="password" autocomplete="new-password" type="password" placeholder="Crie uma senha" required />
+                </label>
+                <label>Nome do profissional
+                  <input name="name" placeholder="Nome completo" required />
+                </label>
+                <label>Registro profissional
+                  <input name="registry" placeholder="CRO, matricula ou identificador" required />
+                </label>
+                <label>Cidade de atuacao
+                  <input name="city" placeholder="Cidade para acompanhar pacientes" required />
+                </label>
+                <label>Local de trabalho
+                  <input name="workplace" placeholder="Clinica, UBS, universidade..." />
+                </label>
+                <button class="primary" type="submit">Salvar profissional</button>
+              </form>
+              <div class="professional-profile" id="professionalProfile"></div>
+            </section>
+          </div>
+
+          <section class="panel patients-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Acompanhamento</p>
+                <h2>Pacientes cadastrados na cidade do profissional</h2>
+              </div>
+              <label class="compact-filter">Filtrar cidade
+                <input id="cityPatientFilter" placeholder="Cidade" />
+              </label>
+            </div>
+            <div class="patient-list" id="patientList"></div>
+          </section>
         </section>
 
         <section class="view" id="calculatorView">
@@ -173,7 +366,7 @@
               <output></output>
             </form>
             <form class="panel calc" id="pointsCalc">
-              <h2>Numero de pontos</h2>
+              <h2>Número de pontos</h2>
               <label>Area da lesao (cm2)<input name="area" type="number" step="0.1" value="1" /></label>
               <label>Area por ponto (cm2)<input name="spot" type="number" step="0.01" value="0.04" /></label>
               <output></output>
@@ -196,13 +389,13 @@
           <div class="layout two-col">
             <section class="panel">
               <div class="section-heading">
-                <h2>Unidades proximas</h2>
-                <button class="secondary" id="locateBtn" type="button">Usar localizacao</button>
+                <h2>Unidades próximas</h2>
+                <button class="secondary" id="locateBtn" type="button">Usar localização</button>
               </div>
               <div class="filters">
                 <label><input type="checkbox" value="SUS" checked /> SUS</label>
                 <label><input type="checkbox" value="Privado" checked /> Privado</label>
-                <label><input type="checkbox" value="Laser" checked /> Laserterapia</label>
+                <label><input type="checkbox" value="Laser" /> Laserterapia</label>
               </div>
               <div class="service-list" id="serviceList"></div>
             </section>
@@ -219,9 +412,9 @@
         <section class="view" id="learningView">
           <section class="panel references-panel">
             <div>
-              <p class="eyebrow">Referencias e apoio institucional</p>
+              <p class="eyebrow">Referências e apoio institucional</p>
               <h2>Laser Oral Aid</h2>
-              <p>Plataforma educacional e clinica vinculada a pesquisa, ensino e apoio a decisao em laserterapia odontologica.</p>
+              <p>Plataforma educacional e clínica vinculada a pesquisa, ensino e apoio à decisão em laserterapia odontológica.</p>
             </div>
             <img src="assets/laser-oral-aid.png" alt="Laser Oral Aid" />
           </section>
@@ -234,7 +427,7 @@
               <h2>Assistente especializado</h2>
               <div class="chat-log" id="chatLog"></div>
               <form class="chat-form" id="chatForm">
-                <input name="message" placeholder="Pergunte sobre protocolo, seguranca, dose..." autocomplete="off" />
+                <input name="message" placeholder="Pergunte sobre protocolo, segurança, dose..." autocomplete="off" />
                 <button class="primary" type="submit">Enviar</button>
               </form>
             </section>
@@ -242,9 +435,9 @@
               <h2>Escopo do assistente</h2>
               <ul class="clean-list">
                 <li>Explica fundamentos de fotobiomodulacao e laser cirurgico.</li>
-                <li>Sugere parametros compativeis com equipamento cadastrado.</li>
-                <li>Aponta contraindicações, alertas e referencias.</li>
-                <li>Reforca que a decisao final e do profissional habilitado.</li>
+                <li>Sugere parâmetros compatíveis com equipamento cadastrado.</li>
+                <li>Aponta contraindicações, alertas e referências.</li>
+                <li>Reforça que a decisão final é do profissional habilitado.</li>
               </ul>
             </aside>
           </div>

@@ -1,7 +1,7 @@
 {
   "name": "Laser Oral Aid",
   "short_name": "LaserAid",
-  "description": "Apoio clinico para laserterapia odontologica, protocolos, equipamentos, calculadoras e rede de atendimento.",
+  "description": "Apoio clínico para laserterapia odontológica, protocolos, equipamentos, calculadoras e rede de atendimento.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#f6f8f7",
@@ -21,4 +21,3 @@
     }
   ]
 }
-  

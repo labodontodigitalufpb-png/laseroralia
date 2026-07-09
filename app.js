@@ -463,10 +463,127 @@ const protocols = [
 ];
 
 const services = [
-  { name: "Centro de Especialidades Odontologicas - CEO Centro", type: "SUS", specialties: "Estomatologia, periodontia, cirurgia oral", laser: true, address: "Av. Central, 1200", phone: "(83) 3000-1001", email: "ceo.centro@saude.gov", hours: "Seg-sex, 7h-17h", distance: 1.8 },
-  { name: "Hospital Universitario - Servico de Estomatologia", type: "SUS", specialties: "Diagnostico oral, biopsia, laserterapia", laser: true, address: "Campus Universitario", phone: "(83) 3000-2200", email: "estomatologia@hu.edu", hours: "Seg-sex, 8h-16h", distance: 4.6 },
-  { name: "Policlinica Odontologica Municipal", type: "SUS", specialties: "Cirurgia, periodontia, atendimento especial", laser: false, address: "Rua da Saude, 88", phone: "(83) 3000-3300", email: "poliodonto@saude.gov", hours: "Seg-sex, 7h-19h", distance: 3.1 },
-  { name: "Clinica Integrada de Laser Odontologico", type: "Privado", specialties: "Laserterapia, DTM, peri-implantite", laser: true, address: "Rua das Acacias, 410", phone: "(83) 3000-4400", email: "contato@laserodonto.com", hours: "Seg-sab, 8h-20h", distance: 2.4 }
+  {
+    name: "Faculdade de Odontologia da UFAL (FOUFAL)",
+    type: "SUS",
+    category: "Universidade / Clínica Escola",
+    specialties: "Estomatologia, cirurgia, pesquisa clínica e fotobiomodulação.",
+    laser: true,
+    address: "Cidade Universitária, Av. Lourival Melo Mota, s/n, Tabuleiro do Martins, Maceió-AL, CEP 57072-970",
+    phone: "(82) 3214-1163",
+    hours: "Atendimento conforme agenda da clínica escola",
+    distance: 2.1
+  },
+  {
+    name: "PAM Salgadinho - Serviço de Estomatologia",
+    type: "SUS",
+    category: "Referência SUS",
+    specialties: "Referência estadual para diagnóstico de câncer de boca; encaminhamento para CACON; potencial uso de PBM.",
+    laser: true,
+    address: "Rua Cônego Machado, Farol, Maceió-AL",
+    phone: "Atendimento mediante encaminhamento da APS",
+    hours: "Consultar fluxo municipal",
+    distance: 3.4
+  },
+  {
+    name: "CESMAC Campus I",
+    type: "Privado",
+    category: "Clínica Escola",
+    specialties: "Centro de Laser, Liga Acadêmica de Lasers e atendimento clínico.",
+    laser: true,
+    address: "Rua Cônego Machado, 984, Farol, Maceió-AL, CEP 57051-160",
+    phone: "(82) 3215-5000",
+    hours: "Atendimento conforme agenda da clínica escola",
+    distance: 3.7
+  },
+  {
+    name: "Universidade Federal da Paraíba (Campus I)",
+    type: "SUS",
+    category: "Universidade",
+    specialties: "Clínica de Estomatologia, pesquisa e atendimento especializado.",
+    laser: true,
+    address: "Cidade Universitária, Castelo Branco, João Pessoa-PB, CEP 58051-900",
+    phone: "Clínica de Estomatologia (Faculdade de Odontologia)",
+    hours: "Consultar agenda institucional",
+    distance: 4.6
+  },
+  {
+    name: "Hospital Napoleão Laureano",
+    type: "SUS",
+    category: "CACON",
+    specialties: "Odontologia hospitalar, mucosite oral e pacientes oncológicos.",
+    laser: true,
+    address: "Av. Capitão José Pessoa, 1140, Jaguaribe, João Pessoa-PB, CEP 58015-170",
+    phone: "(83) 3015-6200",
+    hours: "Consultar hospital",
+    distance: 5.2
+  },
+  {
+    name: "Brasil Sorridente - Centro de Especialidades Odontológicas",
+    type: "SUS",
+    category: "CEO",
+    specialties: "Estomatologia e especialidades odontológicas.",
+    laser: false,
+    address: "Rua Alberto de Brito, 411, Jaguaribe, João Pessoa-PB",
+    phone: "(83) 3218-9804",
+    hours: "Consultar regulação municipal",
+    distance: 5.6
+  },
+  {
+    name: "CEO Mangabeira",
+    type: "SUS",
+    category: "CEO",
+    specialties: "Especialidades odontológicas.",
+    laser: false,
+    address: "Rua Romário Cupertino de Morais, s/n, Mangabeira, João Pessoa-PB",
+    phone: "(83) 3213-7625",
+    hours: "Consultar regulação municipal",
+    distance: 6.2
+  },
+  {
+    name: "CEO Torre - Urgência 24 horas",
+    type: "SUS",
+    category: "CEO",
+    specialties: "Atendimento odontológico especializado.",
+    laser: false,
+    address: "Av. Rui Barbosa, Torre, João Pessoa-PB",
+    phone: "(83) 3213-7626",
+    hours: "Urgência 24 horas",
+    distance: 6.7
+  },
+  {
+    name: "UNIFAL - Faculdade de Odontologia",
+    type: "SUS",
+    category: "Universidade",
+    specialties: "Clínica de Estomatologia, cirurgia e laser.",
+    laser: true,
+    address: "Rua Gabriel Monteiro da Silva, 700, Centro, Alfenas-MG",
+    phone: "Clínica de Estomatologia: (35) 3701-9416",
+    hours: "Consultar agenda institucional",
+    distance: 8.4
+  },
+  {
+    name: "Hospital Universitário Alzira Velano",
+    type: "SUS",
+    category: "Hospital Universitário",
+    specialties: "Atendimento hospitalar e apoio às especialidades odontológicas.",
+    laser: false,
+    address: "Rua Geraldo Freitas da Costa, 120, Jardim Aeroporto III, Alfenas-MG",
+    phone: "(35) 3299-3500",
+    hours: "Consultar hospital",
+    distance: 8.9
+  },
+  {
+    name: "Hospital das Clínicas Samuel Libânio",
+    type: "SUS",
+    category: "Hospital Universitário",
+    specialties: "Hospital de referência regional.",
+    laser: false,
+    address: "Rua Comendador José Garcia, 777, Centro, Pouso Alegre-MG",
+    phone: "(35) 3429-3200",
+    hours: "Consultar hospital",
+    distance: 9.6
+  }
 ];
 
 const learning = [
@@ -480,12 +597,37 @@ const learning = [
 
 let selectedProtocol = protocols[0];
 let selectedDevice = devices[0];
+let patients = loadStored("laserOralAidPatients", [
+  {
+    id: "sample-joao-pessoa",
+    username: "paciente",
+    password: "1234",
+    name: "Paciente exemplo",
+    age: "46",
+    sex: "Feminino",
+    city: "Joao Pessoa",
+    address: "Bairro Centro",
+    therapyPlace: "Hospital Universitario - Servico de Estomatologia",
+    notes: "Acompanhamento de mucosite oral",
+    createdAt: new Date().toISOString()
+  }
+]);
+let professional = loadStored("laserOralAidProfessional", null);
+let currentSession = loadStored("laserOralAidSession", null);
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 const fmt = (n, digits = 1) => Number(n).toFixed(digits).replace(/\.0$/, "");
+const normalize = (value) => String(value || "")
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .trim()
+  .toLowerCase();
 
 function init() {
+  localizeTextRecords([devices, protocols, services, learning, patients]);
+  validateSession();
+  migratePatientAccess();
   populateDevices();
   populateDatalist();
   bindNavigation();
@@ -494,12 +636,206 @@ function init() {
   bindCalculators();
   bindMap();
   bindAssistant();
+  bindPatientModule();
   renderProtocols();
   renderProtocolDetail(selectedProtocol);
   renderDevices();
   renderServices();
   renderLearning();
+  renderPatientModule();
+  renderSummary();
   registerServiceWorker();
+}
+
+function validateSession() {
+  if (currentSession?.role === "patient" && !patients.some((patient) => patient.id === currentSession.id)) {
+    currentSession = null;
+  }
+  if (currentSession?.role === "professional" && !professional) {
+    currentSession = null;
+  }
+  saveStored("laserOralAidSession", currentSession);
+}
+
+function migratePatientAccess() {
+  let changed = false;
+  patients = patients.map((patient, index) => {
+    if (patient.username && patient.password) return patient;
+    changed = true;
+    return {
+      ...patient,
+      username: patient.username || (index === 0 ? "paciente" : `paciente${index + 1}`),
+      password: patient.password || "1234"
+    };
+  });
+  if (changed) saveStored("laserOralAidPatients", patients);
+}
+
+function localizeTextRecords(collections) {
+  const skipKeys = new Set(["id", "username", "password", "email", "phone"]);
+  const visit = (value, key = "") => {
+    if (typeof value === "string") return skipKeys.has(key) ? value : accentText(value);
+    if (Array.isArray(value)) return value.map((item) => visit(item, key));
+    if (value && typeof value === "object") {
+      Object.keys(value).forEach((itemKey) => {
+        value[itemKey] = visit(value[itemKey], itemKey);
+      });
+    }
+    return value;
+  };
+  collections.forEach((collection) => visit(collection));
+}
+
+function accentText(text) {
+  const replacements = [
+    [/\bSaude\b/g, "Saúde"],
+    [/\bsaude\b/g, "saúde"],
+    [/\bDoenca\b/g, "Doença"],
+    [/\bdoenca\b/g, "doença"],
+    [/\bclinica\b/g, "clínica"],
+    [/\bclinico\b/g, "clínico"],
+    [/\bclinicos\b/g, "clínicos"],
+    [/\bClinica\b/g, "Clínica"],
+    [/\bOdontologica\b/g, "Odontológica"],
+    [/\bodontologica\b/g, "odontológica"],
+    [/\bevidencia\b/g, "evidência"],
+    [/\bEvidencia\b/g, "Evidência"],
+    [/\bevidencias\b/g, "evidências"],
+    [/\bindicacao\b/g, "indicação"],
+    [/\bIndicacao\b/g, "Indicação"],
+    [/\bdecisao\b/g, "decisão"],
+    [/\bexecucao\b/g, "execução"],
+    [/\bvalidacao\b/g, "validação"],
+    [/\blegislacao\b/g, "legislação"],
+    [/\bbiosseguranca\b/g, "biossegurança"],
+    [/\bdiagnostico\b/g, "diagnóstico"],
+    [/\bDiagnostico\b/g, "Diagnóstico"],
+    [/\bavaliacao\b/g, "avaliação"],
+    [/\bavaliacoes\b/g, "avaliações"],
+    [/\bautorizacao\b/g, "autorização"],
+    [/\bautorizacoes\b/g, "autorizações"],
+    [/\bterapeutico\b/g, "terapêutico"],
+    [/\bterapeutica\b/g, "terapêutica"],
+    [/\boncologico\b/g, "oncológico"],
+    [/\boncologica\b/g, "oncológica"],
+    [/\boncologicos\b/g, "oncológicos"],
+    [/\binfeccao\b/g, "infecção"],
+    [/\binfeccoes\b/g, "infecções"],
+    [/\birritacao\b/g, "irritação"],
+    [/\bIrritacao\b/g, "Irritação"],
+    [/\bcompressao\b/g, "compressão"],
+    [/\bCompressao\b/g, "Compressão"],
+    [/\bcomplicacao\b/g, "complicação"],
+    [/\bcomplicacoes\b/g, "complicações"],
+    [/\bneurologicos\b/g, "neurológicos"],
+    [/\bneurologica\b/g, "neurológica"],
+    [/\bInflamacao\b/g, "Inflamação"],
+    [/\binflamacao\b/g, "inflamação"],
+    [/\bReducao\b/g, "Redução"],
+    [/\breducao\b/g, "redução"],
+    [/\bDescontaminacao\b/g, "Descontaminação"],
+    [/\bdescontaminacao\b/g, "descontaminação"],
+    [/\bFotobiomodulacao\b/g, "Fotobiomodulação"],
+    [/\bfotobiomodulacao\b/g, "fotobiomodulação"],
+    [/\bpotencia\b/g, "potência"],
+    [/\bPotencia\b/g, "Potência"],
+    [/\bparametros\b/g, "parâmetros"],
+    [/\bParametros\b/g, "Parâmetros"],
+    [/\btermico\b/g, "térmico"],
+    [/\btermica\b/g, "térmica"],
+    [/\bproteção\b/g, "proteção"],
+    [/\bprotecao\b/g, "proteção"],
+    [/\boculos\b/g, "óculos"],
+    [/\bseguranca\b/g, "segurança"],
+    [/\bSeguranca\b/g, "Segurança"],
+    [/\bLesao\b/g, "Lesão"],
+    [/\blesao\b/g, "lesão"],
+    [/\bLesoes\b/g, "Lesões"],
+    [/\blesoes\b/g, "lesões"],
+    [/\bulcera\b/g, "úlcera"],
+    [/\bulceras\b/g, "úlceras"],
+    [/\bulceracao\b/g, "ulceração"],
+    [/\bUlcerativas\b/g, "Ulcerativas"],
+    [/\bcirurgico\b/g, "cirúrgico"],
+    [/\bcirurgica\b/g, "cirúrgica"],
+    [/\bcirurgicas\b/g, "cirúrgicas"],
+    [/\bpos-operatorio\b/g, "pós-operatório"],
+    [/\bpos-operatoria\b/g, "pós-operatória"],
+    [/\bPos-operatoria\b/g, "Pós-operatória"],
+    [/\boperatorias\b/g, "operatórias"],
+    [/\baplicacao\b/g, "aplicação"],
+    [/\bAplicacao\b/g, "Aplicação"],
+    [/\bselecao\b/g, "seleção"],
+    [/\bevolucao\b/g, "evolução"],
+    [/\bcriterios\b/g, "critérios"],
+    [/\bRaciocinio\b/g, "Raciocínio"],
+    [/\braciocinio\b/g, "raciocínio"],
+    [/\bDiferencas\b/g, "Diferenças"],
+    [/\bdiferencas\b/g, "diferenças"],
+    [/\bfisicos\b/g, "físicos"],
+    [/\binteracao\b/g, "interação"],
+    [/\bavancados\b/g, "avançados"],
+    [/\bcronica\b/g, "crônica"],
+    [/\bCronica\b/g, "Crônica"],
+    [/\baguda\b/g, "aguda"],
+    [/\barea\b/g, "área"],
+    [/\bArea\b/g, "Área"],
+    [/\bareas\b/g, "áreas"],
+    [/\bAreas\b/g, "Áreas"],
+    [/\bnumero\b/g, "número"],
+    [/\bNumero\b/g, "Número"],
+    [/\bproximas\b/g, "próximas"],
+    [/\bproximo\b/g, "próximo"],
+    [/\btransformacao\b/g, "transformação"],
+    [/\bestratificacao\b/g, "estratificação"],
+    [/\bremovivel\b/g, "removível"],
+    [/\bhomogenea\b/g, "homogênea"],
+    [/\bNodulos\b/g, "Nódulos"],
+    [/\bnodulos\b/g, "nódulos"],
+    [/\bcronico\b/g, "crônico"],
+    [/\bFotocoagulacao\b/g, "Fotocoagulação"],
+    [/\bfotocoagulacao\b/g, "fotocoagulação"],
+    [/\bvaporizacao\b/g, "vaporização"],
+    [/\bReferencias\b/g, "Referências"],
+    [/\breferencias\b/g, "referências"],
+    [/\bRevisoes\b/g, "Revisões"],
+    [/\brevisoes\b/g, "revisões"],
+    [/\bNao\b/g, "Não"],
+    [/\bnao\b/g, "não"],
+    [/\bsera\b/g, "será"],
+    [/\bsao\b/g, "são"],
+    [/\bpossivel\b/g, "possível"],
+    [/\bPossivel\b/g, "Possível"],
+    [/\bPossiveis\b/g, "Possíveis"],
+    [/\bpossiveis\b/g, "possíveis"],
+    [/\bnecessario\b/g, "necessário"],
+    [/\bNecessario\b/g, "Necessário"],
+    [/\bdisponivel\b/g, "disponível"],
+    [/\bmaximo\b/g, "máximo"],
+    [/\btecnico\b/g, "técnico"],
+    [/\bmecanico\b/g, "mecânico"],
+    [/\bfluencia\b/g, "fluência"],
+    [/\bFluencia\b/g, "Fluência"],
+    [/\bIrradiancia\b/g, "Irradiância"],
+    [/\birradiancia\b/g, "irradiância"],
+    [/\bcontraindicacoes\b/g, "contraindicações"],
+    [/\bContraindicacoes\b/g, "Contraindicações"],
+    [/\bmanifestacoes\b/g, "manifestações"],
+    [/\bManifestacoes\b/g, "Manifestações"],
+    [/\bAssociacoes\b/g, "Associações"],
+    [/\bassociacoes\b/g, "associações"],
+    [/\bObservacoes\b/g, "Observações"],
+    [/\bobservacoes\b/g, "observações"],
+    [/\bEndereco\b/g, "Endereço"],
+    [/\bendereco\b/g, "endereço"],
+    [/\bSessao\b/g, "Sessão"],
+    [/\bsessao\b/g, "sessão"],
+    [/\bsessoes\b/g, "sessões"],
+    [/\bSessoes\b/g, "Sessões"],
+    [/\bOla\b/g, "Olá"],
+    [/\bVoce\b/g, "Você"]
+  ];
+  return replacements.reduce((value, [pattern, replacement]) => value.replace(pattern, replacement), text);
 }
 
 function populateDevices() {
@@ -519,8 +855,10 @@ function populateDatalist() {
 
 function bindNavigation() {
   const titles = {
-    protocols: "Protocolos clinicos",
+    home: "Laser Oral Aid",
+    protocols: "Protocolos clínicos",
     simulator: "Simulador inteligente",
+    patients: "Pacientes e profissionais",
     calculator: "Calculadoras",
     devices: "Equipamentos",
     map: "Rede de atendimento",
@@ -529,13 +867,19 @@ function bindNavigation() {
   };
   $$("#navList .nav-item").forEach((button) => {
     button.addEventListener("click", () => {
-      $$(".nav-item").forEach((item) => item.classList.remove("active"));
-      $$(".view").forEach((view) => view.classList.remove("active"));
-      button.classList.add("active");
-      $(`#${button.dataset.view}View`).classList.add("active");
-      $("#pageTitle").textContent = titles[button.dataset.view];
+      activateView(button.dataset.view, titles);
     });
   });
+  $$(".home-jump").forEach((button) => {
+    button.addEventListener("click", () => activateView(button.dataset.viewTarget, titles));
+  });
+}
+
+function activateView(view, titles) {
+  $$(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === view));
+  $$(".view").forEach((viewNode) => viewNode.classList.remove("active"));
+  $(`#${view}View`).classList.add("active");
+  $("#pageTitle").textContent = titles[view];
 }
 
 function bindSearchAndFilters() {
@@ -570,7 +914,7 @@ function renderProtocols() {
       <strong>${protocol.name}</strong>
       <span>${protocol.summary}</span>
       <div class="badge-row">
-        <span class="badge">${protocol.laserType === "low" ? "Baixa potencia" : "Alta potencia"}</span>
+        <span class="badge">${protocol.laserType === "low" ? "Baixa potência" : "Alta potência"}</span>
         <span class="badge warn">${protocol.evidence}</span>
       </div>
     </button>
@@ -582,6 +926,7 @@ function renderProtocols() {
       renderProtocolDetail(selectedProtocol);
     });
   });
+  renderSummary();
 }
 
 function matchesLesionPreference(protocol, preference) {
@@ -611,37 +956,37 @@ function renderProtocolDetail(protocol) {
   const adjusted = adaptProtocol(protocol, selectedDevice);
   $("#protocolDetail").innerHTML = `
     <div class="badge-row">
-      <span class="badge">${protocol.laserType === "low" ? "Fotobiomodulacao" : "Laser de alta potencia"}</span>
-      <span class="badge ${compatible ? "" : "danger"}">${compatible ? "Compativel com equipamento" : "Ajuste necessario"}</span>
-      <span class="badge warn">Evidencia: ${protocol.evidence}</span>
+      <span class="badge">${protocol.laserType === "low" ? "Fotobiomodulação" : "Laser de alta potência"}</span>
+      <span class="badge ${compatible ? "" : "danger"}">${compatible ? "Compatível com equipamento" : "Ajuste necessário"}</span>
+      <span class="badge warn">Evidência: ${protocol.evidence}</span>
     </div>
     <h2>${protocol.name}</h2>
     <p>${protocol.summary}</p>
     <div class="meta-grid">
-      <div><h3>Manifestacoes</h3><p>${protocol.manifestations}</p></div>
+      <div><h3>Manifestações</h3><p>${protocol.manifestations}</p></div>
       <div><h3>Objetivos</h3><p>${protocol.goals.join(", ")}</p></div>
       <div><h3>Indicacoes e pontos</h3><p>${protocol.points}</p></div>
-      <div><h3>Contraindicacoes</h3><p>${protocol.contraindications}</p></div>
+      <div><h3>Contraindicações</h3><p>${protocol.contraindications}</p></div>
     </div>
     <div class="parameter-grid">
       ${metric("Comprimento de onda", `${adjusted.wavelength} nm`)}
-      ${metric("Potencia", `${fmt(adjusted.powerW, 2)} W`)}
+      ${metric("Potência", `${fmt(adjusted.powerW, 2)} W`)}
       ${metric("Energia por ponto", `${fmt(adjusted.energyJ, 1)} J`)}
       ${metric("Densidade energia", `${fmt(adjusted.fluenceJcm2, 1)} J/cm2`)}
-      ${metric("Irradiancia", `${fmt(adjusted.irradianceWcm2, 1)} W/cm2`)}
+      ${metric("Irradiância", `${fmt(adjusted.irradianceWcm2, 1)} W/cm2`)}
       ${metric("Tempo por ponto", `${fmt(adjusted.seconds, 0)} s`)}
       ${metric("Modo", protocol.mode)}
       ${metric("Sessoes", protocol.sessions)}
     </div>
     <h3>Posologia</h3>
     <p>${protocol.frequency}. Area: ${protocol.area}. Tempo total estimado: ${fmt(adjusted.totalSeconds / 60, 1)} min para ${adjusted.pointsCount} pontos.</p>
-    <h3>Seguranca</h3>
+    <h3>Segurança</h3>
     <p>${protocol.safety}</p>
-    <h3>Associacoes e eventos adversos</h3>
-    <p>Associar terapias medicamentosas, periodontais, cirurgicas ou oncológicas quando indicadas. Possiveis efeitos: ${protocol.adverse}</p>
-    <h3>Referencias base</h3>
+    <h3>Associações e eventos adversos</h3>
+    <p>Associar terapias medicamentosas, periodontais, cirúrgicas ou oncológicas quando indicadas. Possíveis efeitos: ${protocol.adverse}</p>
+    <h3>Referências base</h3>
     <ul>${protocol.refs.map((ref) => `<li>${ref}</li>`).join("")}</ul>
-    ${compatible ? "" : `<p class="clinical-warning">O equipamento selecionado nao cobre integralmente o protocolo original. O app selecionou o comprimento de onda mais proximo e limitou potencia ao maximo cadastrado; valide clinicamente antes do uso.</p>`}
+    ${compatible ? "" : `<p class="clinical-warning">O equipamento selecionado não cobre integralmente o protocolo original. O app selecionou o comprimento de onda mais próximo e limitou a potência ao máximo cadastrado; valide clinicamente antes do uso.</p>`}
   `;
 }
 
@@ -701,27 +1046,27 @@ function bindSimulator() {
       <div class="badge-row">
         <span class="badge">${data.goal}</span>
         <span class="badge">${data.phase}</span>
-        <span class="badge ${compatible ? "" : "danger"}">${compatible ? "Parametros compativeis" : "Compatibilidade parcial"}</span>
+        <span class="badge ${compatible ? "" : "danger"}">${compatible ? "Parâmetros compatíveis" : "Compatibilidade parcial"}</span>
       </div>
       <h2>Protocolo personalizado</h2>
-      <p><strong>Diagnostico:</strong> ${protocol.name}. <strong>Local:</strong> ${data.site || "nao informado"}. <strong>Paciente:</strong> ${data.age} anos.</p>
+      <p><strong>Diagnóstico:</strong> ${protocol.name}. <strong>Local:</strong> ${data.site || "não informado"}. <strong>Paciente:</strong> ${data.age} anos.</p>
       <div class="parameter-grid">
         ${metric("Equipamento", `${selectedDevice.brand} ${selectedDevice.model}`)}
         ${metric("Comprimento de onda", `${adjusted.wavelength} nm`)}
-        ${metric("Potencia sugerida", `${fmt(adjusted.powerW, 2)} W`)}
+        ${metric("Potência sugerida", `${fmt(adjusted.powerW, 2)} W`)}
         ${metric("Energia por ponto", `${fmt(adjusted.energyJ, 1)} J`)}
         ${metric("Pontos estimados", adjusted.pointsCount)}
         ${metric("Tempo por ponto", `${fmt(adjusted.seconds, 0)} s`)}
         ${metric("Tempo total", `${fmt(adjusted.totalSeconds / 60, 1)} min`)}
         ${metric("Modo", protocol.mode)}
       </div>
-      <h3>Justificativa dos parametros</h3>
-      <p>A sugestao parte do protocolo cadastrado para ${protocol.name}, ajusta o comprimento de onda ao emissor disponivel e limita a potencia ao maximo tecnico do aparelho. A energia por ponto e a grade de pontos foram estimadas pela area informada e pela area de spot cadastrada.</p>
-      <h3>Cuidados clinicos</h3>
-      <p>${protocol.safety} Contraindicacoes: ${protocol.contraindications}</p>
+      <h3>Justificativa dos parâmetros</h3>
+      <p>A sugestão parte do protocolo cadastrado para ${protocol.name}, ajusta o comprimento de onda ao emissor disponível e limita a potência ao máximo técnico do aparelho. A energia por ponto e a grade de pontos foram estimadas pela área informada e pela área de spot cadastrada.</p>
+      <h3>Cuidados clínicos</h3>
+      <p>${protocol.safety} Contraindicações: ${protocol.contraindications}</p>
       <h3>Protocolos alternativos</h3>
       <p>${alternativeText(protocol)}</p>
-      <h3>Referencias</h3>
+      <h3>Referências</h3>
       <ul>${protocol.refs.map((ref) => `<li>${ref}</li>`).join("")}</ul>
     `;
   });
@@ -729,9 +1074,9 @@ function bindSimulator() {
 
 function alternativeText(protocol) {
   if (protocol.laserType === "low") {
-    return "Quando houver resposta insuficiente, comparar aplicacao pontual com varredura, ajustar energia dentro da janela terapeutica e reavaliar diagnostico, fase da lesao e terapia associada.";
+    return "Quando houver resposta insuficiente, comparar aplicação pontual com varredura, ajustar energia dentro da janela terapêutica e reavaliar diagnóstico, fase da lesão e terapia associada.";
   }
-  return "Para lasers cirurgicos, comparar fibra em contato, modo pulsado e abordagens convencionais, priorizando menor dano termico e descontaminacao mecanica adequada.";
+  return "Para lasers cirúrgicos, comparar fibra em contato, modo pulsado e abordagens convencionais, priorizando menor dano térmico e descontaminação mecânica adequada.";
 }
 
 function bindCalculators() {
@@ -766,9 +1111,9 @@ function updateParameterAlerts() {
   const adapted = adaptProtocol(selectedProtocol, selectedDevice);
   const alerts = [];
   if (!isCompatible(selectedProtocol, selectedDevice)) alerts.push("Equipamento selecionado tem compatibilidade parcial com o protocolo ativo.");
-  if (adapted.fluenceJcm2 > 150 && selectedDevice.type === "low") alerts.push("Fluencia estimada elevada para fotobiomodulacao; confirme area de spot e energia por ponto.");
-  if (adapted.irradianceWcm2 > 5 && selectedDevice.type === "low") alerts.push("Irradiancia alta; reduzir potencia ou aumentar area efetiva pode ser necessario.");
-  if (selectedDevice.type === "high") alerts.push("Laser de alta potencia exige treinamento especifico, controle termico e protecao ocular para cada comprimento de onda.");
+  if (adapted.fluenceJcm2 > 150 && selectedDevice.type === "low") alerts.push("Fluência estimada elevada para fotobiomodulação; confirme área de spot e energia por ponto.");
+  if (adapted.irradianceWcm2 > 5 && selectedDevice.type === "low") alerts.push("Irradiância alta; reduzir potência ou aumentar área efetiva pode ser necessário.");
+  if (selectedDevice.type === "high") alerts.push("Laser de alta potência exige treinamento específico, controle térmico e proteção ocular para cada comprimento de onda.");
   $("#parameterAlerts").innerHTML = `<h2>Alertas inteligentes</h2>${alerts.map((alert) => `<p class="clinical-warning">${alert}</p>`).join("") || "<p class='muted'>Nenhum alerta para o protocolo e equipamento atuais.</p>"}`;
 }
 
@@ -777,7 +1122,7 @@ function renderDevices() {
   $("#deviceGrid").innerHTML = devices.map((device) => `
     <article class="device-card">
       <strong>${device.brand} ${device.model}</strong>
-      <span>${device.type === "low" ? "Baixa potencia" : "Alta potencia"} · ${device.wavelengths.join("/")} nm</span>
+      <span>${device.type === "low" ? "Baixa potência" : "Alta potência"} · ${device.wavelengths.join("/")} nm</span>
       <dl>
         <dt>Potencia max.</dt><dd>${device.maxPowerW} W</dd>
         <dt>Modos</dt><dd>${device.modes.join(", ")}</dd>
@@ -795,7 +1140,7 @@ function bindMap() {
   $("#locateBtn").addEventListener("click", () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(() => {
-      $("#locateBtn").textContent = "Localizacao ativa";
+      $("#locateBtn").textContent = "Localização ativa";
       renderServices();
     }, () => {
       $("#locateBtn").textContent = "Permissao negada";
@@ -813,8 +1158,9 @@ function renderServices() {
   $("#serviceList").innerHTML = filtered.map((service) => `
     <article class="service-card">
       <strong>${service.name}</strong>
-      <span>${service.type} · ${service.specialties}</span>
-      <p>${service.address}<br>${service.phone} · ${service.email}<br>${service.hours}</p>
+      <span>${service.type} · ${service.category || "Serviço odontológico"}</span>
+      <p>${service.specialties}</p>
+      <p>${service.address}<br>${[service.phone, service.email].filter(Boolean).join(" · ")}<br>${service.hours}</p>
       <div class="badge-row">
         <span class="badge">${service.distance} km</span>
         <span class="badge ${service.laser ? "" : "warn"}">${service.laser ? "Laserterapia cadastrada" : "Sem laser cadastrado"}</span>
@@ -822,6 +1168,274 @@ function renderServices() {
       </div>
     </article>
   `).join("") || `<p class="muted">Nenhuma unidade corresponde aos filtros.</p>`;
+}
+
+function bindPatientModule() {
+  $("#patientLoginForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const patient = patients.find((item) => item.username === data.username.trim() && item.password === data.password);
+    if (!patient) {
+      setAuthMessage("Login ou senha do paciente não conferem.");
+      return;
+    }
+    currentSession = { role: "patient", id: patient.id };
+    saveStored("laserOralAidSession", currentSession);
+    event.currentTarget.reset();
+    setAuthMessage("Paciente conectado.");
+    setPatientForm(patient);
+    renderPatientModule();
+    renderSummary();
+  });
+
+  $("#professionalLoginForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const valid = professional
+      && professional.username === data.username.trim()
+      && professional.password === data.password;
+    if (!valid) {
+      setAuthMessage("Login ou senha do profissional não conferem.");
+      return;
+    }
+    currentSession = { role: "professional" };
+    saveStored("laserOralAidSession", currentSession);
+    event.currentTarget.reset();
+    setAuthMessage("Profissional conectado.");
+    renderPatientModule();
+    renderSummary();
+  });
+
+  $("#patientForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const id = data.id || "";
+    const username = data.username.trim();
+    const duplicate = patients.some((patient) => patient.username === username && patient.id !== id);
+    if (duplicate) {
+      setAuthMessage("Este login de paciente já está em uso.");
+      return;
+    }
+    const patient = {
+      id: id || createId(),
+      username,
+      password: data.password,
+      name: data.name.trim(),
+      age: data.age.trim(),
+      sex: data.sex,
+      city: data.city.trim(),
+      address: data.address.trim(),
+      therapyPlace: data.therapyPlace.trim(),
+      notes: data.notes.trim(),
+      createdAt: patients.find((item) => item.id === id)?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    patients = id
+      ? patients.map((item) => item.id === id ? patient : item)
+      : [patient, ...patients];
+    saveStored("laserOralAidPatients", patients);
+    currentSession = { role: "patient", id: patient.id };
+    saveStored("laserOralAidSession", currentSession);
+    setAuthMessage(id ? "Cadastro do paciente atualizado." : "Paciente cadastrado e conectado.");
+    setPatientForm(patient);
+    renderPatientModule();
+    renderSummary();
+  });
+
+  $("#professionalForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    professional = {
+      username: data.username.trim(),
+      password: data.password,
+      name: data.name.trim(),
+      registry: data.registry.trim(),
+      city: data.city.trim(),
+      workplace: data.workplace.trim()
+    };
+    saveStored("laserOralAidProfessional", professional);
+    currentSession = { role: "professional" };
+    saveStored("laserOralAidSession", currentSession);
+    $("#cityPatientFilter").value = professional.city;
+    setAuthMessage("Cadastro profissional salvo e conectado.");
+    renderPatientModule();
+    renderSummary();
+  });
+
+  $("#cancelPatientEditBtn").addEventListener("click", () => {
+    const patient = getCurrentPatient();
+    if (patient) {
+      setPatientForm(patient);
+    } else {
+      resetPatientForm();
+    }
+  });
+
+  $("#cityPatientFilter").addEventListener("input", () => {
+    renderPatientList();
+    renderSummary();
+  });
+}
+
+function renderPatientModule() {
+  if (professional) {
+    const form = $("#professionalForm");
+    form.elements.username.value = professional.username || "";
+    form.elements.password.value = professional.password || "";
+    form.elements.name.value = professional.name || "";
+    form.elements.registry.value = professional.registry || "";
+    form.elements.city.value = professional.city || "";
+    form.elements.workplace.value = professional.workplace || "";
+    if (!$("#cityPatientFilter").value) $("#cityPatientFilter").value = professional.city || "";
+  }
+  const patient = getCurrentPatient();
+  if (patient && currentSession?.role === "patient") {
+    setPatientForm(patient);
+  } else if (!$("#patientForm").elements.id.value) {
+    resetPatientForm();
+  }
+  renderSessionBox();
+  renderProfessionalProfile();
+  renderPatientList();
+}
+
+function renderSessionBox() {
+  const box = $("#sessionBox");
+  const patient = getCurrentPatient();
+  if (currentSession?.role === "patient" && patient) {
+    box.innerHTML = `
+      <strong>Paciente conectado: ${escapeHTML(patient.name)}</strong>
+      <span>${escapeHTML(patient.city)} · ${escapeHTML(patient.therapyPlace)}</span>
+      <button class="secondary" id="logoutBtn" type="button">Sair</button>
+    `;
+  } else if (currentSession?.role === "professional" && professional) {
+    box.innerHTML = `
+      <strong>Profissional conectado: ${escapeHTML(professional.name)}</strong>
+      <span>${escapeHTML(professional.registry)} · ${escapeHTML(professional.city)}</span>
+      <button class="secondary" id="logoutBtn" type="button">Sair</button>
+    `;
+  } else {
+    box.innerHTML = `<span class="muted">Entre para editar cadastro ou acompanhar pacientes por cidade.</span>`;
+  }
+  $("#logoutBtn")?.addEventListener("click", () => {
+    currentSession = null;
+    saveStored("laserOralAidSession", currentSession);
+    setAuthMessage("Sessão encerrada.");
+    resetPatientForm();
+    renderPatientModule();
+    renderSummary();
+  });
+}
+
+function renderProfessionalProfile() {
+  const profile = $("#professionalProfile");
+  if (!professional) {
+    profile.innerHTML = `<p class="muted">Cadastre o profissional para listar automaticamente os pacientes que moram na mesma cidade.</p>`;
+    return;
+  }
+  profile.innerHTML = `
+    <strong>${escapeHTML(professional.name)}</strong>
+    <p class="muted">${escapeHTML(professional.registry)} · ${escapeHTML(professional.city)} · login ${escapeHTML(professional.username || "não definido")}</p>
+    <p>${escapeHTML(professional.workplace || "Local de trabalho não informado")}</p>
+  `;
+}
+
+function renderPatientList() {
+  const city = normalize($("#cityPatientFilter").value || professional?.city);
+  let visiblePatients = [];
+  if (currentSession?.role === "professional" && professional) {
+    visiblePatients = patients.filter((patient) => !city || normalize(patient.city) === city);
+  }
+  if (currentSession?.role === "patient") {
+    visiblePatients = patients.filter((patient) => patient.id === currentSession.id);
+  }
+  if (!currentSession) {
+    $("#patientList").innerHTML = `<p class="muted">Faça login como profissional para ver os pacientes da cidade ou como paciente para editar seu cadastro.</p>`;
+    return;
+  }
+  $("#patientList").innerHTML = visiblePatients.map((patient) => `
+    <article class="patient-record">
+      <header>
+        <div>
+          <strong>${escapeHTML(patient.name)}</strong>
+          <span class="muted">${escapeHTML(patient.age)} anos · ${escapeHTML(patient.sex)}</span>
+        </div>
+        <span class="badge">${escapeHTML(patient.city)}</span>
+      </header>
+      <dl>
+        <dt>Endereço</dt><dd>${escapeHTML(patient.address)}</dd>
+        <dt>Laserterapia</dt><dd>${escapeHTML(patient.therapyPlace)}</dd>
+        <dt>Observações</dt><dd>${escapeHTML(patient.notes || "Sem observações")}</dd>
+      </dl>
+      <div class="patient-actions">
+        <button class="secondary" data-edit-patient="${patient.id}" type="button">Editar</button>
+        ${currentSession?.role === "professional" ? `<button class="icon-button" data-remove-patient="${patient.id}" title="Remover paciente" type="button">&times;</button>` : ""}
+      </div>
+    </article>
+  `).join("") || `<p class="muted">Nenhum paciente encontrado para esta cidade.</p>`;
+
+  $$("[data-edit-patient]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const patient = patients.find((item) => item.id === button.dataset.editPatient);
+      if (!patient) return;
+      if (currentSession?.role === "patient" && currentSession.id !== patient.id) return;
+      setPatientForm(patient);
+      setAuthMessage("Cadastro carregado para edição.");
+      $("#patientForm").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+
+  $$("[data-remove-patient]").forEach((button) => {
+    button.addEventListener("click", () => {
+      patients = patients.filter((patient) => patient.id !== button.dataset.removePatient);
+      saveStored("laserOralAidPatients", patients);
+      renderPatientModule();
+      renderSummary();
+    });
+  });
+}
+
+function renderSummary() {
+  const city = normalize($("#cityPatientFilter")?.value || professional?.city);
+  const cityCount = patients.filter((patient) => city && normalize(patient.city) === city).length;
+  $("#summaryProtocolCount").textContent = protocols.length;
+  $("#summaryPatientCount").textContent = patients.length;
+  $("#summaryCityCount").textContent = city ? cityCount : 0;
+}
+
+function setPatientForm(patient) {
+  const form = $("#patientForm");
+  form.elements.id.value = patient.id || "";
+  form.elements.username.value = patient.username || "";
+  form.elements.password.value = patient.password || "";
+  form.elements.name.value = patient.name || "";
+  form.elements.age.value = patient.age || "";
+  form.elements.sex.value = patient.sex || "";
+  form.elements.city.value = patient.city || "";
+  form.elements.address.value = patient.address || "";
+  form.elements.therapyPlace.value = patient.therapyPlace || "";
+  form.elements.notes.value = patient.notes || "";
+  $("#patientFormTitle").textContent = "Editar cadastro do paciente";
+  $("#savePatientBtn").textContent = "Atualizar paciente";
+  $("#cancelPatientEditBtn").hidden = false;
+}
+
+function resetPatientForm() {
+  const form = $("#patientForm");
+  form.reset();
+  form.elements.id.value = "";
+  $("#patientFormTitle").textContent = "Cadastro para acompanhamento";
+  $("#savePatientBtn").textContent = "Salvar paciente";
+  $("#cancelPatientEditBtn").hidden = true;
+}
+
+function getCurrentPatient() {
+  if (currentSession?.role !== "patient") return null;
+  return patients.find((patient) => patient.id === currentSession.id) || null;
+}
+
+function setAuthMessage(message) {
+  $("#authMessage").textContent = message;
 }
 
 function renderLearning() {
@@ -834,7 +1448,7 @@ function renderLearning() {
 }
 
 function bindAssistant() {
-  const intro = "Ola. Posso explicar protocolos, calcular parametros e lembrar criterios de seguranca. Minhas respostas usam a base local do app e precisam de validacao clinica.";
+  const intro = "Olá. Posso explicar protocolos, calcular parâmetros e lembrar critérios de segurança. Minhas respostas usam a base local do app e precisam de validação clínica.";
   addMessage(intro, "bot");
   $("#chatForm").addEventListener("submit", (event) => {
     event.preventDefault();
@@ -858,17 +1472,17 @@ function answerQuestion(message) {
   const text = message.toLowerCase();
   const match = protocols.find((protocol) => text.includes(protocol.name.toLowerCase()) || protocol.keywords.some((keyword) => text.includes(keyword)));
   if (text.includes("segur") || text.includes("oculos") || text.includes("contra")) {
-    return `Seguranca: use oculos especificos para o comprimento de onda do equipamento, controle tecidos adjacentes, evite irradiar area sem diagnostico e revise contraindicacoes. Para ${selectedDevice.brand} ${selectedDevice.model}, comprimentos cadastrados: ${selectedDevice.wavelengths.join("/")} nm.`;
+    return `Segurança: use óculos específicos para o comprimento de onda do equipamento, controle tecidos adjacentes, evite irradiar área sem diagnóstico e revise contraindicações. Para ${selectedDevice.brand} ${selectedDevice.model}, comprimentos cadastrados: ${selectedDevice.wavelengths.join("/")} nm.`;
   }
   if (text.includes("tempo") || text.includes("calcular") || text.includes("dose")) {
     const adapted = adaptProtocol(match || selectedProtocol, selectedDevice);
-    return `Com o equipamento selecionado, a base atual sugere ${fmt(adapted.energyJ, 1)} J por ponto a ${fmt(adapted.powerW, 2)} W, resultando em aproximadamente ${fmt(adapted.seconds, 0)} segundos por ponto. Confirme area do spot, diagnostico e janela terapeutica.`;
+    return `Com o equipamento selecionado, a base atual sugere ${fmt(adapted.energyJ, 1)} J por ponto a ${fmt(adapted.powerW, 2)} W, resultando em aproximadamente ${fmt(adapted.seconds, 0)} segundos por ponto. Confirme área do spot, diagnóstico e janela terapêutica.`;
   }
   if (match) {
     const adapted = adaptProtocol(match, selectedDevice);
-    return `${match.name}: objetivo principal ${match.goals.join(", ")}. Parametro adaptado: ${adapted.wavelength} nm, ${fmt(adapted.powerW, 2)} W, ${fmt(adapted.energyJ, 1)} J/ponto, ${fmt(adapted.seconds, 0)} s/ponto. Evidencia: ${match.evidence}.`;
+    return `${match.name}: objetivo principal ${match.goals.join(", ")}. Parâmetro adaptado: ${adapted.wavelength} nm, ${fmt(adapted.powerW, 2)} W, ${fmt(adapted.energyJ, 1)} J/ponto, ${fmt(adapted.seconds, 0)} s/ponto. Evidência: ${match.evidence}.`;
   }
-  return "Nao encontrei um protocolo exato na base local. Informe diagnostico, objetivo, area tratada e equipamento para gerar uma sugestao no simulador; em caso de lesao persistente ou suspeita de malignidade, priorize diagnostico e encaminhamento.";
+  return "Não encontrei um protocolo exato na base local. Informe diagnóstico, objetivo, área tratada e equipamento para gerar uma sugestão no simulador; em caso de lesão persistente ou suspeita de malignidade, priorize diagnóstico e encaminhamento.";
 }
 
 function registerServiceWorker() {
@@ -878,6 +1492,32 @@ function registerServiceWorker() {
   }).catch(() => {
     $("#syncStatus").textContent = "Offline indisponivel";
   });
+}
+
+function loadStored(key, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveStored(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function createId() {
+  return globalThis.crypto?.randomUUID?.() || `patient-${Date.now()}-${Math.round(Math.random() * 10000)}`;
+}
+
+function escapeHTML(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 init();
