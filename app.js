@@ -597,6 +597,7 @@ const learning = [
 
 let selectedProtocol = protocols[0];
 let selectedDevice = devices[0];
+let selectedService = services[0];
 let patients = loadStored("laserOralAidPatients", [
   {
     id: "sample-joao-pessoa",
@@ -612,6 +613,12 @@ let patients = loadStored("laserOralAidPatients", [
     createdAt: new Date().toISOString()
   }
 ]);
+const adminProfile = {
+  username: "maceio",
+  password: "maceio",
+  name: "Administrador"
+};
+let professionals = loadStored("laserOralAidProfessionals", null);
 let professional = loadStored("laserOralAidProfessional", null);
 let currentSession = loadStored("laserOralAidSession", null);
 
@@ -628,6 +635,7 @@ function init() {
   localizeTextRecords([devices, protocols, services, learning, patients]);
   validateSession();
   migratePatientAccess();
+  migrateProfessionalAccess();
   populateDevices();
   populateDatalist();
   bindNavigation();
@@ -651,9 +659,10 @@ function validateSession() {
   if (currentSession?.role === "patient" && !patients.some((patient) => patient.id === currentSession.id)) {
     currentSession = null;
   }
-  if (currentSession?.role === "professional" && !professional) {
+  if (currentSession?.role === "professional" && !getCurrentProfessional()) {
     currentSession = null;
   }
+  if (currentSession?.role === "admin" && !isAdminSession(currentSession)) currentSession = null;
   saveStored("laserOralAidSession", currentSession);
 }
 
@@ -669,6 +678,19 @@ function migratePatientAccess() {
     };
   });
   if (changed) saveStored("laserOralAidPatients", patients);
+}
+
+function migrateProfessionalAccess() {
+  if (!Array.isArray(professionals)) {
+    professionals = professional ? [{ ...professional, id: professional.id || createId() }] : [];
+    if (currentSession?.role === "professional" && !currentSession.id && professionals[0]) {
+      currentSession = { role: "professional", id: professionals[0].id };
+      saveStored("laserOralAidSession", currentSession);
+    }
+    saveStored("laserOralAidProfessionals", professionals);
+  }
+  professional = getCurrentProfessional() || professionals[0] || null;
+  if (professional) saveStored("laserOralAidProfessional", professional);
 }
 
 function localizeTextRecords(collections) {
@@ -883,14 +905,7 @@ function activateView(view, titles) {
 }
 
 function bindSearchAndFilters() {
-  $("#globalSearch").addEventListener("input", () => {
-    $("#protocolSearch").value = $("#globalSearch").value;
-    renderProtocols();
-  });
-  $("#protocolSearch").addEventListener("input", () => {
-    $("#globalSearch").value = $("#protocolSearch").value;
-    renderProtocols();
-  });
+  $("#protocolSearch").addEventListener("input", renderProtocols);
   $("#protocolSearchForm").addEventListener("submit", (event) => {
     event.preventDefault();
     renderProtocols();
@@ -900,7 +915,7 @@ function bindSearchAndFilters() {
 }
 
 function renderProtocols() {
-  const term = ($("#protocolSearch").value || $("#globalSearch").value).trim().toLowerCase();
+  const term = $("#protocolSearch").value.trim().toLowerCase();
   const category = $("#conditionFilter").value;
   const lesionPreference = $("#lesionPreference").value;
   const filtered = protocols.filter((protocol) => {
@@ -1155,6 +1170,8 @@ function renderServices() {
     .filter((service) => enabled.includes(service.type))
     .filter((service) => enabled.includes("Laser") ? service.laser : true)
     .sort((a, b) => (a.type === "SUS" ? -1 : 1) - (b.type === "SUS" ? -1 : 1) || a.distance - b.distance);
+  if (!filtered.includes(selectedService)) selectedService = filtered[0] || services[0];
+  renderMapPanel(selectedService);
   $("#serviceList").innerHTML = filtered.map((service) => `
     <article class="service-card">
       <strong>${service.name}</strong>
@@ -1164,10 +1181,41 @@ function renderServices() {
       <div class="badge-row">
         <span class="badge">${service.distance} km</span>
         <span class="badge ${service.laser ? "" : "warn"}">${service.laser ? "Laserterapia cadastrada" : "Sem laser cadastrado"}</span>
+        <button class="badge map-select ${service === selectedService ? "active" : ""}" data-service-name="${escapeHTML(service.name)}" type="button">Ver mapa</button>
         <a class="badge" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(service.address)}" target="_blank" rel="noreferrer">Rota</a>
       </div>
     </article>
   `).join("") || `<p class="muted">Nenhuma unidade corresponde aos filtros.</p>`;
+
+  $$("[data-service-name]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const service = services.find((item) => item.name === button.dataset.serviceName);
+      if (!service) return;
+      selectedService = service;
+      renderServices();
+    });
+  });
+}
+
+function renderMapPanel(service) {
+  if (!service) {
+    $("#mapPanel").innerHTML = `<p class="muted">Selecione um serviço para visualizar o mapa.</p>`;
+    return;
+  }
+  const query = encodeURIComponent(service.address);
+  $("#mapPanel").innerHTML = `
+    <iframe
+      class="map-frame"
+      title="Mapa: ${escapeHTML(service.name)}"
+      src="https://www.google.com/maps?q=${query}&output=embed"
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <div class="map-caption">
+      <strong>${escapeHTML(service.name)}</strong>
+      <span>${escapeHTML(service.address)}</span>
+      <a class="badge" href="https://www.google.com/maps/search/?api=1&query=${query}" target="_blank" rel="noreferrer">Abrir rota</a>
+    </div>
+  `;
 }
 
 function bindPatientModule() {
@@ -1191,17 +1239,33 @@ function bindPatientModule() {
   $("#professionalLoginForm").addEventListener("submit", (event) => {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
-    const valid = professional
-      && professional.username === data.username.trim()
-      && professional.password === data.password;
-    if (!valid) {
+    const loggedProfessional = professionals.find((item) => item.username === data.username.trim() && item.password === data.password);
+    if (!loggedProfessional) {
       setAuthMessage("Login ou senha do profissional não conferem.");
       return;
     }
-    currentSession = { role: "professional" };
+    professional = loggedProfessional;
+    saveStored("laserOralAidProfessional", professional);
+    currentSession = { role: "professional", id: loggedProfessional.id };
     saveStored("laserOralAidSession", currentSession);
     event.currentTarget.reset();
     setAuthMessage("Profissional conectado.");
+    renderPatientModule();
+    renderSummary();
+  });
+
+  $("#adminLoginForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const valid = data.username.trim() === adminProfile.username && data.password === adminProfile.password;
+    if (!valid) {
+      setAuthMessage("Login ou senha do admin não conferem.");
+      return;
+    }
+    currentSession = { role: "admin", username: adminProfile.username };
+    saveStored("laserOralAidSession", currentSession);
+    event.currentTarget.reset();
+    setAuthMessage("Admin conectado. Você pode ver todos os pacientes e profissionais.");
     renderPatientModule();
     renderSummary();
   });
@@ -1234,8 +1298,10 @@ function bindPatientModule() {
       ? patients.map((item) => item.id === id ? patient : item)
       : [patient, ...patients];
     saveStored("laserOralAidPatients", patients);
-    currentSession = { role: "patient", id: patient.id };
-    saveStored("laserOralAidSession", currentSession);
+    if (currentSession?.role !== "admin") {
+      currentSession = { role: "patient", id: patient.id };
+      saveStored("laserOralAidSession", currentSession);
+    }
     setAuthMessage(id ? "Cadastro do paciente atualizado." : "Paciente cadastrado e conectado.");
     setPatientForm(patient);
     renderPatientModule();
@@ -1245,19 +1311,34 @@ function bindPatientModule() {
   $("#professionalForm").addEventListener("submit", (event) => {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
+    const id = data.id || "";
+    const username = data.username.trim();
+    const duplicate = professionals.some((item) => item.username === username && item.id !== id);
+    if (duplicate) {
+      setAuthMessage("Este login profissional já está em uso.");
+      return;
+    }
     professional = {
-      username: data.username.trim(),
+      id: id || createId(),
+      username,
       password: data.password,
       name: data.name.trim(),
       registry: data.registry.trim(),
       city: data.city.trim(),
-      workplace: data.workplace.trim()
+      workplace: data.workplace.trim(),
+      updatedAt: new Date().toISOString()
     };
+    professionals = id
+      ? professionals.map((item) => item.id === id ? professional : item)
+      : [professional, ...professionals];
+    saveStored("laserOralAidProfessionals", professionals);
     saveStored("laserOralAidProfessional", professional);
-    currentSession = { role: "professional" };
-    saveStored("laserOralAidSession", currentSession);
-    $("#cityPatientFilter").value = professional.city;
-    setAuthMessage("Cadastro profissional salvo e conectado.");
+    if (currentSession?.role !== "admin") {
+      currentSession = { role: "professional", id: professional.id };
+      saveStored("laserOralAidSession", currentSession);
+      $("#cityPatientFilter").value = professional.city;
+    }
+    setAuthMessage(currentSession?.role === "admin" ? "Cadastro profissional salvo." : "Cadastro profissional salvo e conectado.");
     renderPatientModule();
     renderSummary();
   });
@@ -1278,15 +1359,17 @@ function bindPatientModule() {
 }
 
 function renderPatientModule() {
+  professional = getCurrentProfessional() || professional;
   if (professional) {
     const form = $("#professionalForm");
+    form.elements.id.value = professional.id || "";
     form.elements.username.value = professional.username || "";
     form.elements.password.value = professional.password || "";
     form.elements.name.value = professional.name || "";
     form.elements.registry.value = professional.registry || "";
     form.elements.city.value = professional.city || "";
     form.elements.workplace.value = professional.workplace || "";
-    if (!$("#cityPatientFilter").value) $("#cityPatientFilter").value = professional.city || "";
+    if (currentSession?.role !== "admin" && !$("#cityPatientFilter").value) $("#cityPatientFilter").value = professional.city || "";
   }
   const patient = getCurrentPatient();
   if (patient && currentSession?.role === "patient") {
@@ -1297,6 +1380,7 @@ function renderPatientModule() {
   renderSessionBox();
   renderProfessionalProfile();
   renderPatientList();
+  renderProfessionalList();
 }
 
 function renderSessionBox() {
@@ -1314,8 +1398,14 @@ function renderSessionBox() {
       <span>${escapeHTML(professional.registry)} · ${escapeHTML(professional.city)}</span>
       <button class="secondary" id="logoutBtn" type="button">Sair</button>
     `;
+  } else if (currentSession?.role === "admin") {
+    box.innerHTML = `
+      <strong>Admin conectado: ${escapeHTML(adminProfile.name)}</strong>
+      <span>Acesso a todos os pacientes e profissionais cadastrados neste dispositivo.</span>
+      <button class="secondary" id="logoutBtn" type="button">Sair</button>
+    `;
   } else {
-    box.innerHTML = `<span class="muted">Entre para editar cadastro ou acompanhar pacientes por cidade.</span>`;
+    box.innerHTML = `<span class="muted">Entre para editar cadastro, acompanhar pacientes por cidade ou administrar todos os registros.</span>`;
   }
   $("#logoutBtn")?.addEventListener("click", () => {
     currentSession = null;
@@ -1341,18 +1431,24 @@ function renderProfessionalProfile() {
 }
 
 function renderPatientList() {
-  const city = normalize($("#cityPatientFilter").value || professional?.city);
+  const isAdmin = currentSession?.role === "admin";
+  const city = normalize($("#cityPatientFilter").value || (isAdmin ? "" : professional?.city));
   let visiblePatients = [];
   if (currentSession?.role === "professional" && professional) {
+    visiblePatients = patients.filter((patient) => !city || normalize(patient.city) === city);
+  }
+  if (isAdmin) {
     visiblePatients = patients.filter((patient) => !city || normalize(patient.city) === city);
   }
   if (currentSession?.role === "patient") {
     visiblePatients = patients.filter((patient) => patient.id === currentSession.id);
   }
   if (!currentSession) {
-    $("#patientList").innerHTML = `<p class="muted">Faça login como profissional para ver os pacientes da cidade ou como paciente para editar seu cadastro.</p>`;
+    $("#patientListTitle").textContent = "Pacientes cadastrados";
+    $("#patientList").innerHTML = `<p class="muted">Faça login como profissional para ver os pacientes da cidade, como paciente para editar seu cadastro ou como admin para ver todos.</p>`;
     return;
   }
+  $("#patientListTitle").textContent = isAdmin ? "Todos os pacientes cadastrados" : "Pacientes cadastrados na cidade do profissional";
   $("#patientList").innerHTML = visiblePatients.map((patient) => `
     <article class="patient-record">
       <header>
@@ -1369,10 +1465,10 @@ function renderPatientList() {
       </dl>
       <div class="patient-actions">
         <button class="secondary" data-edit-patient="${patient.id}" type="button">Editar</button>
-        ${currentSession?.role === "professional" ? `<button class="icon-button" data-remove-patient="${patient.id}" title="Remover paciente" type="button">&times;</button>` : ""}
+        ${canManageRecords() ? `<button class="icon-button" data-remove-patient="${patient.id}" title="Remover paciente" type="button">&times;</button>` : ""}
       </div>
     </article>
-  `).join("") || `<p class="muted">Nenhum paciente encontrado para esta cidade.</p>`;
+  `).join("") || `<p class="muted">${isAdmin ? "Nenhum paciente cadastrado." : "Nenhum paciente encontrado para esta cidade."}</p>`;
 
   $$("[data-edit-patient]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1395,12 +1491,61 @@ function renderPatientList() {
   });
 }
 
+function renderProfessionalList() {
+  const list = $("#professionalList");
+  if (!list) return;
+  if (currentSession?.role !== "admin") {
+    list.innerHTML = `<p class="muted">Entre como admin para ver todos os profissionais cadastrados.</p>`;
+    return;
+  }
+  list.innerHTML = professionals.map((item) => `
+    <article class="patient-record">
+      <header>
+        <div>
+          <strong>${escapeHTML(item.name)}</strong>
+          <span class="muted">${escapeHTML(item.registry)} · login ${escapeHTML(item.username || "não definido")}</span>
+        </div>
+        <span class="badge">${escapeHTML(item.city)}</span>
+      </header>
+      <dl>
+        <dt>Local</dt><dd>${escapeHTML(item.workplace || "Local de trabalho não informado")}</dd>
+        <dt>Registro</dt><dd>${escapeHTML(item.registry)}</dd>
+      </dl>
+      <div class="patient-actions">
+        <button class="secondary" data-edit-professional="${item.id}" type="button">Editar</button>
+      </div>
+    </article>
+  `).join("") || `<p class="muted">Nenhum profissional cadastrado.</p>`;
+
+  $$("[data-edit-professional]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const selected = professionals.find((item) => item.id === button.dataset.editProfessional);
+      if (!selected) return;
+      professional = selected;
+      saveStored("laserOralAidProfessional", professional);
+      const form = $("#professionalForm");
+      form.elements.id.value = selected.id || "";
+      form.elements.username.value = selected.username || "";
+      form.elements.password.value = selected.password || "";
+      form.elements.name.value = selected.name || "";
+      form.elements.registry.value = selected.registry || "";
+      form.elements.city.value = selected.city || "";
+      form.elements.workplace.value = selected.workplace || "";
+      setAuthMessage("Cadastro profissional carregado para edição.");
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
+
 function renderSummary() {
-  const city = normalize($("#cityPatientFilter")?.value || professional?.city);
+  const canViewSummary = currentSession?.role === "professional" || currentSession?.role === "admin";
+  $("#appSummary").hidden = !canViewSummary;
+  if (!canViewSummary) return;
+  const city = normalize($("#cityPatientFilter")?.value || (currentSession?.role === "admin" ? "" : professional?.city));
   const cityCount = patients.filter((patient) => city && normalize(patient.city) === city).length;
   $("#summaryProtocolCount").textContent = protocols.length;
   $("#summaryPatientCount").textContent = patients.length;
-  $("#summaryCityCount").textContent = city ? cityCount : 0;
+  $("#summaryCityCount").textContent = currentSession?.role === "admin" && !city ? professionals.length : city ? cityCount : 0;
 }
 
 function setPatientForm(patient) {
@@ -1432,6 +1577,23 @@ function resetPatientForm() {
 function getCurrentPatient() {
   if (currentSession?.role !== "patient") return null;
   return patients.find((patient) => patient.id === currentSession.id) || null;
+}
+
+function getCurrentProfessional() {
+  if (!Array.isArray(professionals)) return professional || null;
+  if (currentSession?.role === "professional" && currentSession.id) {
+    return professionals.find((item) => item.id === currentSession.id) || null;
+  }
+  if (currentSession?.role === "professional" && professional) return professional;
+  return professional && professionals.some((item) => item.id === professional.id) ? professional : null;
+}
+
+function isAdminSession(session) {
+  return session?.role === "admin" && session.username === adminProfile.username;
+}
+
+function canManageRecords() {
+  return currentSession?.role === "professional" || currentSession?.role === "admin";
 }
 
 function setAuthMessage(message) {

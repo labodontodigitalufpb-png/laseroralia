@@ -15,7 +15,7 @@
           <img class="brand-logo" src="assets/laser-oral-aid.png" alt="Laser Oral Aid" />
           <div>
             <strong>Laser Oral Aid</strong>
-            <small>Tecnologia a laser. Saúde que transforma.</small>
+            <small>Desenvolvido por UFAL, CESMAC, LABODIGIT/UFPB e PET Telestomatologia UNIFAL-MG.</small>
           </div>
         </div>
 
@@ -54,20 +54,13 @@
               <img src="assets/pet-telestomatologia-unifal-mg.jpeg" alt="PET Telestomatologia UNIFAL-MG" />
             </div>
           </div>
-          <div class="top-actions">
-            <label class="search">
-              <span>Buscar</span>
-              <input id="globalSearch" type="search" placeholder="Doença, diagnóstico, objetivo..." />
-            </label>
-            <select id="deviceSelect" aria-label="Equipamento selecionado"></select>
-          </div>
         </header>
 
         <section class="clinical-warning" role="note">
           Ferramenta de apoio à decisão. A indicação, ajuste de dose e execução do tratamento são responsabilidade do cirurgião-dentista, com validação clínica, treinamento, biossegurança e legislação local.
         </section>
 
-        <section class="app-summary" aria-label="Resumo do aplicativo">
+        <section class="app-summary" id="appSummary" aria-label="Resumo do aplicativo" hidden>
           <article>
             <span>Protocolos</span>
             <strong id="summaryProtocolCount">0</strong>
@@ -86,12 +79,11 @@
           <section class="home-hero">
             <div class="home-hero-copy">
               <img class="home-app-logo" src="assets/laser-oral-aid.png" alt="Laser Oral Aid" />
-              <p class="eyebrow">Aplicativo de apoio em laserterapia odontológica</p>
-              <h2>Protocolos, acompanhamento e rede de cuidado em um só lugar.</h2>
+              <p class="eyebrow">Laserterapia odontológica</p>
+              <h2>Protocolos, pacientes e rede de atendimento.</h2>
               <p>
-                O Laser Oral Aid reúne ferramentas para apoiar o ensino, a tomada de decisão clínica,
-                o cadastro de pacientes, o acompanhamento profissional e a localização de serviços com
-                potencial atuação em laserterapia.
+                Ferramentas essenciais para consulta clínica, simulação de parâmetros,
+                cadastro local e localização de serviços.
               </p>
               <div class="home-actions">
                 <button class="primary home-jump" data-view-target="patients" type="button">Entrar no app</button>
@@ -110,27 +102,27 @@
           <section class="home-features" aria-label="Funcionalidades do aplicativo">
             <article>
               <strong>Protocolos clínicos</strong>
-              <p>Biblioteca com parâmetros, objetivos terapêuticos, segurança, contraindicações e referências.</p>
+              <p>Parâmetros, segurança e referências.</p>
             </article>
             <article>
               <strong>Simulador inteligente</strong>
-              <p>Gera uma sugestão adaptada ao equipamento, área tratada, objetivo e fase do caso.</p>
+              <p>Sugestão adaptada ao caso.</p>
             </article>
             <article>
               <strong>Pacientes e profissionais</strong>
-              <p>Cadastro local com login, senha, edição pelo paciente e acompanhamento por cidade.</p>
+              <p>Cadastro local e acompanhamento.</p>
             </article>
             <article>
               <strong>Calculadoras clínicas</strong>
-              <p>Auxilia no cálculo de tempo por ponto, densidade de energia e número de pontos.</p>
+              <p>Tempo, fluência e pontos.</p>
             </article>
             <article>
               <strong>Equipamentos</strong>
-              <p>Consulta modelos, comprimentos de onda, potência, modo de uso e limitações técnicas.</p>
+              <p>Modelos e limites técnicos.</p>
             </article>
             <article>
               <strong>Rede de atendimento</strong>
-              <p>Lista universidades, CEOs, hospitais e serviços de referência relacionados ao cuidado odontológico.</p>
+              <p>Serviços e rotas no mapa.</p>
             </article>
           </section>
         </section>
@@ -154,6 +146,9 @@
                   <input id="protocolSearch" type="search" placeholder="Lesão, diagnóstico, objetivo..." />
                 </label>
                 <button class="secondary" type="submit">Buscar</button>
+                <label class="device-filter">Equipamento / tipo de laser
+                  <select id="deviceSelect" aria-label="Equipamento selecionado"></select>
+                </label>
                 <label class="preference-filter">Preferência para lesões
                   <select id="lesionPreference">
                     <option value="all">Todas as lesões</option>
@@ -226,11 +221,11 @@
             <div class="section-heading">
               <div>
                 <p class="eyebrow">Acesso seguro local</p>
-                <h2>Entrar como paciente ou profissional</h2>
+                <h2>Entrar como paciente, profissional ou admin</h2>
               </div>
               <div class="session-box" id="sessionBox"></div>
             </div>
-            <div class="layout two-col auth-grid">
+            <div class="auth-grid">
               <form class="form-grid stacked-form" id="patientLoginForm">
                 <h3>Acesso do paciente</h3>
                 <label>Login
@@ -250,6 +245,16 @@
                   <input name="password" autocomplete="current-password" type="password" placeholder="Senha" required />
                 </label>
                 <button class="primary" type="submit">Entrar como profissional</button>
+              </form>
+              <form class="form-grid stacked-form" id="adminLoginForm">
+                <h3>Acesso admin</h3>
+                <label>Login
+                  <input name="username" autocomplete="username" placeholder="Login admin" required />
+                </label>
+                <label>Senha
+                  <input name="password" autocomplete="current-password" type="password" placeholder="Senha" required />
+                </label>
+                <button class="primary" type="submit">Entrar como admin</button>
               </form>
             </div>
             <p class="auth-message" id="authMessage"></p>
@@ -313,6 +318,7 @@
                 </div>
               </div>
               <form class="form-grid stacked-form" id="professionalForm">
+                <input name="id" type="hidden" />
                 <label>Login profissional
                   <input name="username" autocomplete="username" placeholder="Ex.: cro12345" required />
                 </label>
@@ -341,13 +347,23 @@
             <div class="section-heading">
               <div>
                 <p class="eyebrow">Acompanhamento</p>
-                <h2>Pacientes cadastrados na cidade do profissional</h2>
+                <h2 id="patientListTitle">Pacientes cadastrados na cidade do profissional</h2>
               </div>
               <label class="compact-filter">Filtrar cidade
                 <input id="cityPatientFilter" placeholder="Cidade" />
               </label>
             </div>
             <div class="patient-list" id="patientList"></div>
+          </section>
+
+          <section class="panel professionals-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Administração</p>
+                <h2>Profissionais cadastrados</h2>
+              </div>
+            </div>
+            <div class="professional-list" id="professionalList"></div>
           </section>
         </section>
 
@@ -399,13 +415,7 @@
               </div>
               <div class="service-list" id="serviceList"></div>
             </section>
-            <section class="map-panel" id="mapPanel">
-              <div class="map-pin primary-pin"></div>
-              <div class="map-pin pin-a"></div>
-              <div class="map-pin pin-b"></div>
-              <div class="map-pin pin-c"></div>
-              <div class="map-caption">Mapa demonstrativo com rota integrada via link externo</div>
-            </section>
+            <section class="map-panel" id="mapPanel" aria-label="Mapa do serviço selecionado"></section>
           </div>
         </section>
 
