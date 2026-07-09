@@ -1156,23 +1156,22 @@ function renderDevices() {
 }
 
 function bindMap() {
-  $("#locateBtn").addEventListener("click", () => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(() => {
-      $("#locateBtn").textContent = "Localização ativa";
-      renderServices();
-    }, () => {
-      $("#locateBtn").textContent = "Permissao negada";
-    });
-  });
+  const cities = Array.from(new Set(services.map((service) => getServiceCity(service)).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+  $("#serviceCityFilter").innerHTML = [
+    `<option value="all">Todas as cidades</option>`,
+    ...cities.map((city) => `<option value="${escapeHTML(city)}">${escapeHTML(city)}</option>`)
+  ].join("");
+  $("#serviceCityFilter").addEventListener("change", renderServices);
   $$(".filters input").forEach((input) => input.addEventListener("change", renderServices));
 }
 
 function renderServices() {
   const enabled = $$(".filters input:checked").map((input) => input.value);
+  const selectedCity = $("#serviceCityFilter").value;
   const filtered = services
     .filter((service) => enabled.includes(service.type))
     .filter((service) => enabled.includes("Laser") ? service.laser : true)
+    .filter((service) => selectedCity === "all" || getServiceCity(service) === selectedCity)
     .sort((a, b) => (a.type === "SUS" ? -1 : 1) - (b.type === "SUS" ? -1 : 1) || a.distance - b.distance);
   if (!filtered.includes(selectedService)) selectedService = filtered[0] || services[0];
   renderMapPanel(selectedService);
@@ -1199,6 +1198,11 @@ function renderServices() {
       renderServices();
     });
   });
+}
+
+function getServiceCity(service) {
+  const match = service.address.match(/,\s*([^,]+?)-(?:AL|PB|MG)\b/);
+  return match ? match[1].trim() : "";
 }
 
 function renderMapPanel(service) {

@@ -233,6 +233,18 @@ input:focus, select:focus {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
+.home-institutions {
+  display: grid;
+  grid-template-columns: minmax(260px, .8fr) minmax(320px, 1.2fr);
+  gap: 14px;
+  align-items: center;
+  margin-top: 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+}
+.home-institutions p:last-child { color: var(--muted); line-height: 1.45; margin-bottom: 0; }
 .home-logo-panel img {
   width: 100%;
   height: 122px;
@@ -576,6 +588,7 @@ output {
   .topbar { align-items: stretch; flex-direction: column; }
   .top-logos { display: none; }
   .two-col, .three-col { grid-template-columns: 1fr; }
+  .home-institutions { grid-template-columns: 1fr; }
   .home-logo-panel img { height: 160px; }
   .app-summary { grid-template-columns: repeat(3, minmax(120px, 1fr)); overflow-x: auto; padding-bottom: 4px; }
   .references-panel { grid-template-columns: 1fr; }
@@ -619,6 +632,11 @@ output {
     height: 108px;
     padding: 10px;
   }
+  .home-institutions {
+    margin-top: 10px;
+    padding: 12px;
+  }
+  .home-institutions h2 { margin-bottom: 8px; }
   .home-features { grid-template-columns: 1fr; }
   .map-panel { min-height: 360px; }
   .chat-panel { min-height: 480px; }

@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0f766e" />
     <title>Laser Oral Aid</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=15" />
+    <link rel="stylesheet" href="styles.css?v=16" />
     <style>
       @media (max-width: 980px) {
         .app-shell { display: block; min-height: 100vh; }
@@ -100,12 +100,6 @@
               </div>
             </div>
 
-            <div class="home-logo-panel" aria-label="Instituições parceiras">
-              <img src="assets/ufal.jpg" alt="Universidade Federal de Alagoas" />
-              <img src="assets/cesmac.jpg" alt="CESMAC" />
-              <img src="assets/labodigit.jpg" alt="LABODIGIT Laboratorio de Odontologia Digital PPGO UFPB" />
-              <img src="assets/pet-telestomatologia-unifal-mg.jpeg" alt="PET Telestomatologia UNIFAL-MG" />
-            </div>
           </section>
 
           <section class="home-features" aria-label="Funcionalidades do aplicativo">
@@ -133,6 +127,20 @@
               <strong>Rede de atendimento</strong>
               <p>Serviços e rotas no mapa.</p>
             </article>
+          </section>
+
+          <section class="home-institutions" aria-label="Instituições desenvolvedoras">
+            <div>
+              <p class="eyebrow">Desenvolvimento institucional</p>
+              <h2>App desenvolvido por estas instituições</h2>
+              <p>Laser Oral Aid reúne apoio acadêmico e técnico de UFAL, CESMAC, LABODIGIT/UFPB e PET Telestomatologia UNIFAL-MG.</p>
+            </div>
+            <div class="home-logo-panel" aria-label="Logos das instituições desenvolvedoras">
+              <img src="assets/ufal.jpg" alt="Universidade Federal de Alagoas" />
+              <img src="assets/cesmac.jpg" alt="CESMAC" />
+              <img src="assets/labodigit.jpg" alt="LABODIGIT Laboratorio de Odontologia Digital PPGO UFPB" />
+              <img src="assets/pet-telestomatologia-unifal-mg.jpeg" alt="PET Telestomatologia UNIFAL-MG" />
+            </div>
           </section>
         </section>
 
@@ -415,7 +423,9 @@
             <section class="panel">
               <div class="section-heading">
                 <h2>Unidades próximas</h2>
-                <button class="secondary" id="locateBtn" type="button">Usar localização</button>
+                <label class="compact-filter">Cidade
+                  <select id="serviceCityFilter" aria-label="Filtrar serviços por cidade"></select>
+                </label>
               </div>
               <div class="filters">
                 <label><input type="checkbox" value="SUS" checked /> SUS</label>
@@ -464,6 +474,6 @@
       </main>
     </div>
 
-    <script src="app.js?v=15" type="module"></script>
+    <script src="app.js?v=16" type="module"></script>
   </body>
 </html>
