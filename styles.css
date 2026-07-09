@@ -551,31 +551,35 @@ output {
   .sidebar {
     position: static;
     height: auto;
-    padding: 18px 16px 14px;
-    gap: 16px;
+    padding: 10px 12px 8px;
+    gap: 10px;
   }
   .brand {
-    justify-content: center;
-    text-align: center;
-    flex-direction: column;
+    justify-content: flex-start;
+    text-align: left;
+    flex-direction: row;
     gap: 10px;
   }
   .brand-logo {
-    width: 104px;
-    height: 104px;
+    width: 48px;
+    height: 48px;
   }
+  .brand strong { font-size: .95rem; }
+  .brand small { font-size: .72rem; max-width: none; }
   .nav-list {
     display: flex;
     gap: 8px;
-    margin: 2px -16px 0;
+    margin: 0 -12px;
     overflow-x: auto;
-    padding: 0 16px 8px;
+    padding: 0 12px 6px;
     scrollbar-width: none;
   }
   .nav-list::-webkit-scrollbar { display: none; }
   .nav-item {
     flex: 0 0 auto;
-    min-width: 118px;
+    min-width: 104px;
+    min-height: 36px;
+    padding: 8px 10px;
     text-align: center;
     white-space: nowrap;
     background: rgba(255,255,255,0.07);
@@ -583,7 +587,7 @@ output {
   .nav-item.active, .nav-item:hover { box-shadow: inset 0 -3px 0 #66e0d1; }
   .status-panel { display: none; }
   .topbar { align-items: stretch; flex-direction: column; }
-  .top-logos img { flex: 1 1 118px; }
+  .top-logos { display: none; }
   .two-col, .three-col { grid-template-columns: 1fr; }
   .home-logo-panel img { height: 160px; }
   .app-summary { grid-template-columns: repeat(3, minmax(120px, 1fr)); overflow-x: auto; padding-bottom: 4px; }
@@ -592,33 +596,46 @@ output {
 }
 
 @media (max-width: 620px) {
-  .main { padding: 14px; }
+  .main { padding: 12px; }
   .brand-logo {
-    width: 96px;
-    height: 96px;
+    width: 44px;
+    height: 44px;
   }
-  .brand strong { font-size: 1.18rem; }
-  .brand small { max-width: 260px; }
-  h1 { font-size: 1.8rem; }
+  .brand strong { font-size: .92rem; }
+  .brand small { font-size: .68rem; line-height: 1.25; }
+  h1 { font-size: 1.65rem; }
   h2 { font-size: 1.05rem; }
-  .clinical-warning { font-size: .9rem; }
+  .clinical-warning {
+    font-size: .86rem;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
   .app-summary {
     display: flex;
     scrollbar-width: none;
   }
   .app-summary::-webkit-scrollbar { display: none; }
   .app-summary article { flex: 0 0 58%; }
-  .top-logos img { flex-basis: 46%; height: 58px; }
   .panel, .map-panel { padding: 14px; }
   .condition-card, .device-card, .service-card, .learning-card { padding: 13px; }
   .badge { font-size: .74rem; }
   .home-hero-copy {
     min-height: 0;
-    background-size: 58% auto;
-    padding: 20px;
+    padding: 18px;
   }
-  .home-logo-panel { grid-template-columns: 1fr; }
-  .home-logo-panel img { height: 150px; }
+  .home-app-logo {
+    width: min(70vw, 240px);
+    height: min(70vw, 240px);
+    justify-self: center;
+  }
+  .home-hero-copy h2 { font-size: 1.95rem; }
+  .home-hero-copy p { font-size: .94rem; }
+  .home-actions { display: grid; grid-template-columns: 1fr; }
+  .home-logo-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-logo-panel img {
+    height: 108px;
+    padding: 10px;
+  }
   .home-features { grid-template-columns: 1fr; }
   .map-panel { min-height: 360px; }
   .chat-panel { min-height: 480px; }

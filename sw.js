@@ -1,4 +1,4 @@
-const CACHE_NAME = "laser-oral-aid-v11";
+const CACHE_NAME = "laser-oral-aid-v12";
 const ASSETS = [
   "./",
   "./index.html",
