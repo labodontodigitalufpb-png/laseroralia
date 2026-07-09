@@ -235,14 +235,15 @@ input:focus, select:focus {
 }
 .home-institutions {
   display: grid;
-  grid-template-columns: minmax(260px, .8fr) minmax(320px, 1.2fr);
-  gap: 14px;
-  align-items: center;
-  margin-top: 14px;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(220px, .75fr) minmax(260px, 1.25fr);
+  gap: 12px;
+  align-items: start;
+  margin-top: 0;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 14px;
+  padding: 12px;
 }
 .home-institutions p:last-child { color: var(--muted); line-height: 1.45; margin-bottom: 0; }
 .home-logo-panel img {
@@ -632,11 +633,8 @@ output {
     height: 108px;
     padding: 10px;
   }
-  .home-institutions {
-    margin-top: 10px;
-    padding: 12px;
-  }
-  .home-institutions h2 { margin-bottom: 8px; }
+  .home-institutions { padding: 12px; }
+  .home-institutions strong { margin-bottom: 6px; }
   .home-features { grid-template-columns: 1fr; }
   .map-panel { min-height: 360px; }
   .chat-panel { min-height: 480px; }
