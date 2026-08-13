@@ -464,37 +464,70 @@ const protocols = [
 
 const services = [
   {
-    name: "Faculdade de Odontologia da UFAL (FOUFAL)",
+    name: "Faculdade de Odontologia da Universidade Federal de Alagoas (FOUFAL)",
     type: "SUS",
-    category: "Universidade / Clínica Escola",
-    specialties: "Estomatologia, cirurgia, pesquisa clínica e fotobiomodulação.",
+    category: "Instituição de ensino",
+    specialties: "Referência em fotobiomodulação com laser de baixa e alta potência.",
     laser: true,
-    address: "Cidade Universitária, Av. Lourival Melo Mota, s/n, Tabuleiro do Martins, Maceió-AL, CEP 57072-970",
-    phone: "(82) 3214-1163",
-    hours: "Atendimento conforme agenda da clínica escola",
+    address: "Universidade Federal de Alagoas, Av. Lourival Melo Mota, s/n, Tabuleiro do Martins, Maceió-AL, CEP 57072-900",
+    access: "Acesso direto via aplicativo",
+    hours: "Serviço com acesso direto via aplicativo",
     distance: 2.1
   },
   {
-    name: "PAM Salgadinho - Serviço de Estomatologia",
+    name: "CEO Dr. Luiz de França Canuto - PAM Salgadinho",
     type: "SUS",
-    category: "Referência SUS",
-    specialties: "Referência estadual para diagnóstico de câncer de boca; encaminhamento para CACON; potencial uso de PBM.",
+    category: "Centro de Especialidades Odontológicas",
+    specialties: "Referência em fotobiomodulação com laser de baixa potência.",
     laser: true,
-    address: "Rua Cônego Machado, Farol, Maceió-AL",
-    phone: "Atendimento mediante encaminhamento da APS",
-    hours: "Consultar fluxo municipal",
+    address: "Rua Mizael Domingues, 241, Centro, Maceió-AL, CEP 57020-600",
+    access: "Acesso mediante regulação ou pactuação municipal",
+    hours: "Atendimento conforme regulação da Prefeitura de Maceió",
     distance: 3.4
   },
   {
-    name: "CESMAC Campus I",
+    name: "Centro de Laser em Saúde - Curso de Odontologia do CESMAC",
     type: "Privado",
-    category: "Clínica Escola",
-    specialties: "Centro de Laser, Liga Acadêmica de Lasers e atendimento clínico.",
+    category: "Instituição de ensino",
+    specialties: "Referência em fotobiomodulação com laser de baixa e alta potência.",
     laser: true,
     address: "Rua Cônego Machado, 984, Farol, Maceió-AL, CEP 57051-160",
-    phone: "(82) 3215-5000",
-    hours: "Atendimento conforme agenda da clínica escola",
+    access: "Acesso direto via aplicativo",
+    hours: "Serviço com acesso direto via aplicativo",
     distance: 3.7
+  },
+  {
+    name: "Curso de Odontologia da Afya Maceió",
+    type: "Privado",
+    category: "Instituição de ensino",
+    specialties: "Referência em fotobiomodulação com laser de baixa potência.",
+    laser: true,
+    address: "Av. Comendador Gustavo Paiva, 5017, Cruz das Almas, Maceió-AL, CEP 57038-000",
+    access: "Acesso direto via aplicativo",
+    hours: "Serviço com acesso direto via aplicativo",
+    distance: 4.0
+  },
+  {
+    name: "CEO Rafael de Matos - Unidade Básica de Saúde Arthur Ramos",
+    type: "SUS",
+    category: "Centro de Especialidades Odontológicas",
+    specialties: "Referência em fotobiomodulação com laser de baixa potência.",
+    laser: true,
+    address: "Conjunto Henrique Equelman, Rua I, s/n, próximo ao terminal de ônibus, Tabuleiro, Maceió-AL, CEP 57083-030",
+    access: "Acesso mediante regulação ou pactuação municipal",
+    hours: "Atendimento conforme regulação da Prefeitura de Maceió",
+    distance: 4.3
+  },
+  {
+    name: "CEO do Município de Campo Alegre",
+    type: "SUS",
+    category: "Centro de Especialidades Odontológicas",
+    specialties: "Referência em fotobiomodulação com laser de baixa potência.",
+    laser: true,
+    address: "Av. Senador Máximo, 330, Campo Alegre-AL, CEP 57250-000",
+    access: "Acesso mediante regulação ou pactuação municipal",
+    hours: "Atendimento conforme regulação da Prefeitura de Campo Alegre",
+    distance: 5.0
   },
   {
     name: "Universidade Federal da Paraíba (Campus I)",
@@ -604,6 +637,8 @@ let patients = loadStored("laserOralAidPatients", [
     username: "paciente",
     password: "1234",
     name: "Paciente exemplo",
+    phone: "(83) 99999-9999",
+    preferredService: "Faculdade de Odontologia da Universidade Federal de Alagoas (FOUFAL)",
     age: "46",
     sex: "Feminino",
     city: "Joao Pessoa",
@@ -631,6 +666,20 @@ const normalize = (value) => String(value || "")
   .trim()
   .toLowerCase();
 
+const viewTitles = {
+  home: "Laser Oral Aid",
+  protocols: "Protocolos clínicos",
+  simulator: "Simulador inteligente",
+  patients: "Acesso",
+  registration: "Cadastro",
+  tracking: "Acompanhamento",
+  calculator: "Calculadoras",
+  devices: "Equipamentos",
+  map: "Rede de atendimento",
+  learning: "Ensino e atlas",
+  assistant: "Assistente IA"
+};
+
 function init() {
   localizeTextRecords([devices, protocols, services, learning, patients]);
   validateSession();
@@ -638,6 +687,9 @@ function init() {
   migrateProfessionalAccess();
   populateDevices();
   populateDatalist();
+  populatePreferredServices();
+  setupRegistrationPage();
+  setupTrackingPage();
   bindNavigation();
   bindSearchAndFilters();
   bindSimulator();
@@ -669,12 +721,13 @@ function validateSession() {
 function migratePatientAccess() {
   let changed = false;
   patients = patients.map((patient, index) => {
-    if (patient.username && patient.password) return patient;
+    if (patient.username && patient.password && "preferredService" in patient) return patient;
     changed = true;
     return {
       ...patient,
       username: patient.username || (index === 0 ? "paciente" : `paciente${index + 1}`),
-      password: patient.password || "1234"
+      password: patient.password || "1234",
+      preferredService: patient.preferredService || ""
     };
   });
   if (changed) saveStored("laserOralAidPatients", patients);
@@ -875,37 +928,70 @@ function populateDatalist() {
   $("#diagnosisList").innerHTML = protocols.map((protocol) => `<option value="${protocol.name}"></option>`).join("");
 }
 
+function populatePreferredServices() {
+  $("#preferredServiceSelect").innerHTML = [
+    `<option value="">Selecione uma unidade</option>`,
+    ...services.filter((service) => service.laser).map((service) =>
+      `<option value="${escapeHTML(service.name)}">${escapeHTML(service.name)} · ${escapeHTML(getServiceCity(service))}</option>`
+    )
+  ].join("");
+}
+
 function bindNavigation() {
-  const titles = {
-    home: "Laser Oral Aid",
-    protocols: "Protocolos clínicos",
-    simulator: "Simulador inteligente",
-    patients: "Pacientes e profissionais",
-    calculator: "Calculadoras",
-    devices: "Equipamentos",
-    map: "Rede de atendimento",
-    learning: "Ensino e atlas",
-    assistant: "Assistente IA"
-  };
   $$("#navList .nav-item").forEach((button) => {
     button.addEventListener("click", () => {
-      activateView(button.dataset.view, titles);
+      activateView(button.dataset.view);
     });
   });
   $$(".home-jump").forEach((button) => {
-    button.addEventListener("click", () => activateView(button.dataset.viewTarget, titles));
+    button.addEventListener("click", () => activateView(button.dataset.viewTarget));
   });
 }
 
-function activateView(view, titles) {
+function activateView(view) {
+  if (view === "learning" && !["professional", "admin"].includes(currentSession?.role)) {
+    setAuthMessage("O módulo de ensino está disponível apenas para profissionais e administradores.");
+    view = "patients";
+  }
   $$(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === view));
   $$(".view").forEach((viewNode) => viewNode.classList.remove("active"));
   const activeView = $(`#${view}View`);
   activeView.classList.add("active");
-  $("#pageTitle").textContent = titles[view];
+  $("#pageTitle").textContent = viewTitles[view] || "Laser Oral Aid";
   if (matchMedia("(max-width: 980px)").matches) {
     activeView.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+}
+
+function setupRegistrationPage() {
+  const forms = $(".patients-layout");
+  $("#registrationForms").append(forms);
+  $$('[data-registration-role]').forEach((button) => {
+    button.addEventListener("click", () => openRegistrationPage(button.dataset.registrationRole));
+  });
+  $("#backToAccessBtn").addEventListener("click", () => activateView("patients"));
+}
+
+function setupTrackingPage() {
+  $("#trackingContent").append($(".patients-panel"));
+}
+
+function openRegistrationPage(role, editing = false) {
+  const isPatient = role === "patient";
+  $(".patient-card").hidden = !isPatient;
+  $(".professional-card").hidden = isPatient;
+  $("#professionalProfile").hidden = isPatient || !editing;
+  if (!editing) {
+    if (isPatient) resetPatientForm();
+    else resetProfessionalForm();
+  }
+  $("#registrationPageTitle").textContent = editing
+    ? isPatient ? "Editar cadastro do paciente" : "Editar cadastro profissional"
+    : isPatient ? "Cadastro de paciente" : "Cadastro profissional";
+  $("#registrationPageDescription").textContent = editing
+    ? "Atualize seus dados e salve as alterações."
+    : "Preencha os dados abaixo para criar seu acesso.";
+  activateView("registration");
 }
 
 function bindSearchAndFilters() {
@@ -1184,6 +1270,7 @@ function renderServices() {
       <div class="badge-row">
         <span class="badge">${service.distance} km</span>
         <span class="badge ${service.laser ? "" : "warn"}">${service.laser ? "Laserterapia cadastrada" : "Sem laser cadastrado"}</span>
+        ${service.access ? `<span class="badge">${escapeHTML(service.access)}</span>` : ""}
         <button class="badge map-select ${service === selectedService ? "active" : ""}" data-service-name="${escapeHTML(service.name)}" type="button">Ver mapa</button>
         <a class="badge" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(service.address)}" target="_blank" rel="noreferrer">Rota</a>
       </div>
@@ -1227,6 +1314,17 @@ function renderMapPanel(service) {
 }
 
 function bindPatientModule() {
+  $("#patientForm").elements.phone.addEventListener("input", (event) => {
+    event.currentTarget.value = formatPhone(event.currentTarget.value);
+  });
+
+  $$('[data-recovery-role]').forEach((button) => {
+    button.addEventListener('click', () => openPasswordRecovery(button.dataset.recoveryRole));
+  });
+  $('#closePasswordRecoveryBtn').addEventListener('click', closePasswordRecovery);
+  $('#cancelPasswordRecoveryBtn').addEventListener('click', closePasswordRecovery);
+  $('#passwordRecoveryForm').addEventListener('submit', handlePasswordRecovery);
+
   $("#patientLoginForm").addEventListener("submit", (event) => {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
@@ -1242,6 +1340,7 @@ function bindPatientModule() {
     setPatientForm(patient);
     renderPatientModule();
     renderSummary();
+    activateView("patients");
   });
 
   $("#professionalLoginForm").addEventListener("submit", (event) => {
@@ -1281,7 +1380,11 @@ function bindPatientModule() {
   $("#patientForm").addEventListener("submit", (event) => {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
-    const id = data.id || "";
+    const id = currentSession?.role === "patient" ? currentSession.id : data.id || "";
+    if (currentSession?.role === "patient" && !patients.some((item) => item.id === id)) {
+      setAuthMessage("Não foi possível localizar seu cadastro para edição.");
+      return;
+    }
     const username = data.username.trim();
     const duplicate = patients.some((patient) => patient.username === username && patient.id !== id);
     if (duplicate) {
@@ -1293,11 +1396,13 @@ function bindPatientModule() {
       username,
       password: data.password,
       name: data.name.trim(),
+      phone: formatPhone(data.phone),
       age: data.age.trim(),
       sex: data.sex,
       city: data.city.trim(),
       address: data.address.trim(),
       therapyPlace: data.therapyPlace.trim(),
+      preferredService: data.preferredService,
       notes: data.notes.trim(),
       createdAt: patients.find((item) => item.id === id)?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -1306,7 +1411,7 @@ function bindPatientModule() {
       ? patients.map((item) => item.id === id ? patient : item)
       : [patient, ...patients];
     saveStored("laserOralAidPatients", patients);
-    if (currentSession?.role !== "admin") {
+    if (!currentSession || currentSession.role === "patient") {
       currentSession = { role: "patient", id: patient.id };
       saveStored("laserOralAidSession", currentSession);
     }
@@ -1314,12 +1419,21 @@ function bindPatientModule() {
     setPatientForm(patient);
     renderPatientModule();
     renderSummary();
+    activateView("patients");
   });
 
   $("#professionalForm").addEventListener("submit", (event) => {
     event.preventDefault();
+    if (currentSession?.role === "patient") {
+      setAuthMessage("O paciente pode editar apenas o próprio cadastro.");
+      return;
+    }
     const data = Object.fromEntries(new FormData(event.currentTarget));
-    const id = data.id || "";
+    const id = currentSession?.role === "professional" ? currentSession.id : data.id || "";
+    if (currentSession?.role === "professional" && !professionals.some((item) => item.id === id)) {
+      setAuthMessage("Não foi possível localizar seu cadastro profissional para edição.");
+      return;
+    }
     const username = data.username.trim();
     const duplicate = professionals.some((item) => item.username === username && item.id !== id);
     if (duplicate) {
@@ -1349,6 +1463,7 @@ function bindPatientModule() {
     setAuthMessage(currentSession?.role === "admin" ? "Cadastro profissional salvo." : "Cadastro profissional salvo e conectado.");
     renderPatientModule();
     renderSummary();
+    activateView("patients");
   });
 
   $("#cancelPatientEditBtn").addEventListener("click", () => {
@@ -1366,18 +1481,79 @@ function bindPatientModule() {
   });
 }
 
+function openPasswordRecovery(role) {
+  const isPatient = role === "patient";
+  const loginForm = isPatient ? $("#patientLoginForm") : $("#professionalLoginForm");
+  const form = $("#passwordRecoveryForm");
+  form.reset();
+  form.elements.role.value = isPatient ? "patient" : "professional";
+  form.elements.username.value = loginForm.elements.username.value.trim();
+  $("#passwordRecoveryTitle").textContent = isPatient ? "Redefinir senha do paciente" : "Redefinir senha do profissional";
+  $("#recoveryIdentifierLabel").textContent = isPatient ? "Nome completo" : "Registro profissional";
+  form.elements.identifier.placeholder = isPatient ? "Nome informado no cadastro" : "CRO, matrícula ou identificador";
+  $("#passwordRecoveryPanel").hidden = false;
+  setAuthMessage("Confirme seus dados para criar uma nova senha.");
+  (form.elements.username.value ? form.elements.identifier : form.elements.username).focus();
+}
+
+function closePasswordRecovery() {
+  $("#passwordRecoveryForm").reset();
+  $("#passwordRecoveryPanel").hidden = true;
+}
+
+function handlePasswordRecovery(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const data = Object.fromEntries(new FormData(form));
+  const username = data.username.trim();
+  const identifier = normalize(data.identifier);
+  if (data.newPassword !== data.confirmPassword) {
+    setAuthMessage("A confirmação não corresponde à nova senha.");
+    form.elements.confirmPassword.focus();
+    return;
+  }
+
+  if (data.role === "patient") {
+    const patient = patients.find((item) => item.username === username && normalize(item.name) === identifier);
+    if (!patient) {
+      setAuthMessage("Não foi possível confirmar o login e o nome do paciente.");
+      return;
+    }
+    patients = patients.map((item) => item.id === patient.id
+      ? { ...item, password: data.newPassword, updatedAt: new Date().toISOString() }
+      : item);
+    saveStored("laserOralAidPatients", patients);
+  } else {
+    const recoveredProfessional = professionals.find((item) => item.username === username && normalize(item.registry) === identifier);
+    if (!recoveredProfessional) {
+      setAuthMessage("Não foi possível confirmar o login e o registro profissional.");
+      return;
+    }
+    professionals = professionals.map((item) => item.id === recoveredProfessional.id
+      ? { ...item, password: data.newPassword, updatedAt: new Date().toISOString() }
+      : item);
+    if (professional?.id === recoveredProfessional.id) {
+      professional = professionals.find((item) => item.id === recoveredProfessional.id);
+      saveStored("laserOralAidProfessional", professional);
+    }
+    saveStored("laserOralAidProfessionals", professionals);
+  }
+
+  closePasswordRecovery();
+  setAuthMessage("Senha redefinida. Use a nova senha para entrar.");
+  const loginForm = data.role === "patient" ? $("#patientLoginForm") : $("#professionalLoginForm");
+  loginForm.elements.username.value = username;
+  loginForm.elements.password.focus();
+}
+
 function renderPatientModule() {
+  updateRoleNavigation();
   professional = getCurrentProfessional() || professional;
-  if (professional) {
-    const form = $("#professionalForm");
-    form.elements.id.value = professional.id || "";
-    form.elements.username.value = professional.username || "";
-    form.elements.password.value = professional.password || "";
-    form.elements.name.value = professional.name || "";
-    form.elements.registry.value = professional.registry || "";
-    form.elements.city.value = professional.city || "";
-    form.elements.workplace.value = professional.workplace || "";
+  if (professional && (currentSession?.role === "professional" || currentSession?.role === "admin")) {
+    setProfessionalForm(professional);
     if (currentSession?.role !== "admin" && !$("#cityPatientFilter").value) $("#cityPatientFilter").value = professional.city || "";
+  } else if (currentSession?.role === "patient") {
+    resetProfessionalForm();
   }
   const patient = getCurrentPatient();
   if (patient && currentSession?.role === "patient") {
@@ -1391,6 +1567,18 @@ function renderPatientModule() {
   renderProfessionalList();
 }
 
+function updateRoleNavigation() {
+  const canAccessLearning = ["professional", "admin"].includes(currentSession?.role);
+  $$('[data-restricted-roles]').forEach((item) => {
+    const roles = item.dataset.restrictedRoles.split(",");
+    item.hidden = !roles.includes(currentSession?.role);
+  });
+  renderLearning();
+  if ($("#learningView").classList.contains("active") && !canAccessLearning) {
+    activateView("patients");
+  }
+}
+
 function renderSessionBox() {
   const box = $("#sessionBox");
   const patient = getCurrentPatient();
@@ -1398,13 +1586,20 @@ function renderSessionBox() {
     box.innerHTML = `
       <strong>Paciente conectado: ${escapeHTML(patient.name)}</strong>
       <span>${escapeHTML(patient.city)} · ${escapeHTML(patient.therapyPlace)}</span>
-      <button class="secondary" id="logoutBtn" type="button">Sair</button>
+      <div class="session-actions">
+        <button class="secondary" id="editOwnProfileBtn" type="button">Editar meu cadastro</button>
+        <button class="secondary" id="logoutBtn" type="button">Sair</button>
+      </div>
     `;
   } else if (currentSession?.role === "professional" && professional) {
     box.innerHTML = `
       <strong>Profissional conectado: ${escapeHTML(professional.name)}</strong>
       <span>${escapeHTML(professional.registry)} · ${escapeHTML(professional.city)}</span>
-      <button class="secondary" id="logoutBtn" type="button">Sair</button>
+      <div class="session-actions">
+        <button class="secondary" id="editOwnProfileBtn" type="button">Editar meu cadastro</button>
+        <button class="primary" id="openTrackingBtn" type="button">Abrir acompanhamento</button>
+        <button class="secondary" id="logoutBtn" type="button">Sair</button>
+      </div>
     `;
   } else if (currentSession?.role === "admin") {
     box.innerHTML = `
@@ -1415,6 +1610,20 @@ function renderSessionBox() {
   } else {
     box.innerHTML = `<span class="muted">Entre para editar cadastro, acompanhar pacientes por cidade ou administrar todos os registros.</span>`;
   }
+  $("#editOwnProfileBtn")?.addEventListener("click", () => {
+    if (currentSession?.role === "patient" && patient) {
+      setPatientForm(patient);
+      setAuthMessage("Seu cadastro está pronto para edição.");
+      openRegistrationPage("patient", true);
+      return;
+    }
+    if (currentSession?.role === "professional" && professional) {
+      setProfessionalForm(professional);
+      setAuthMessage("Seu cadastro profissional está pronto para edição.");
+      openRegistrationPage("professional", true);
+    }
+  });
+  $("#openTrackingBtn")?.addEventListener("click", () => activateView("tracking"));
   $("#logoutBtn")?.addEventListener("click", () => {
     currentSession = null;
     saveStored("laserOralAidSession", currentSession);
@@ -1427,6 +1636,10 @@ function renderSessionBox() {
 
 function renderProfessionalProfile() {
   const profile = $("#professionalProfile");
+  if (currentSession?.role === "patient") {
+    profile.innerHTML = `<p class="muted">Seu acesso permite editar apenas o cadastro de paciente conectado.</p>`;
+    return;
+  }
   if (!professional) {
     profile.innerHTML = `<p class="muted">Cadastre o profissional para listar automaticamente os pacientes que moram na mesma cidade.</p>`;
     return;
@@ -1440,7 +1653,20 @@ function renderProfessionalProfile() {
 
 function renderPatientList() {
   const isAdmin = currentSession?.role === "admin";
-  const city = normalize($("#cityPatientFilter").value || (isAdmin ? "" : professional?.city));
+  const isProfessional = currentSession?.role === "professional" && professional;
+  const cityFilter = $("#cityPatientFilter");
+  cityFilter.disabled = !isAdmin;
+  if (isProfessional) cityFilter.value = professional.city || "";
+  if (!currentSession || currentSession.role === "patient") cityFilter.value = "";
+  $("#cityPatientFilterLabel").textContent = isProfessional ? "Cidade do profissional" : "Filtrar cidade";
+  $("#trackingAccessSummary").textContent = isProfessional
+    ? `Exibindo exclusivamente pacientes cadastrados em ${professional.city}.`
+    : isAdmin
+      ? "Acesso administrativo a pacientes de todas as cidades."
+      : currentSession?.role === "patient"
+        ? "Você pode consultar e atualizar o seu próprio cadastro."
+        : "Entre como profissional para consultar os pacientes cadastrados na sua cidade.";
+  const city = isAdmin ? normalize(cityFilter.value) : isProfessional ? normalize(professional.city) : "";
   let visiblePatients = [];
   if (currentSession?.role === "professional" && professional) {
     visiblePatients = patients.filter((patient) => !city || normalize(patient.city) === city);
@@ -1456,7 +1682,11 @@ function renderPatientList() {
     $("#patientList").innerHTML = `<p class="muted">Faça login como profissional para ver os pacientes da cidade, como paciente para editar seu cadastro ou como admin para ver todos.</p>`;
     return;
   }
-  $("#patientListTitle").textContent = isAdmin ? "Todos os pacientes cadastrados" : "Pacientes cadastrados na cidade do profissional";
+  $("#patientListTitle").textContent = isAdmin
+    ? "Todos os pacientes cadastrados"
+    : isProfessional
+      ? `Pacientes cadastrados em ${professional.city}`
+      : "Meu cadastro de acompanhamento";
   $("#patientList").innerHTML = visiblePatients.map((patient) => `
     <article class="patient-record">
       <header>
@@ -1467,8 +1697,10 @@ function renderPatientList() {
         <span class="badge">${escapeHTML(patient.city)}</span>
       </header>
       <dl>
+        <dt>Telefone</dt><dd>${escapeHTML(patient.phone || "Não informado")}</dd>
         <dt>Endereço</dt><dd>${escapeHTML(patient.address)}</dd>
         <dt>Laserterapia</dt><dd>${escapeHTML(patient.therapyPlace)}</dd>
+        <dt>Preferência</dt><dd>${escapeHTML(patient.preferredService || "Não informada")}</dd>
         <dt>Observações</dt><dd>${escapeHTML(patient.notes || "Sem observações")}</dd>
       </dl>
       <div class="patient-actions">
@@ -1485,7 +1717,7 @@ function renderPatientList() {
       if (currentSession?.role === "patient" && currentSession.id !== patient.id) return;
       setPatientForm(patient);
       setAuthMessage("Cadastro carregado para edição.");
-      $("#patientForm").scrollIntoView({ behavior: "smooth", block: "start" });
+      openRegistrationPage("patient", true);
     });
   });
 
@@ -1540,7 +1772,7 @@ function renderProfessionalList() {
       form.elements.city.value = selected.city || "";
       form.elements.workplace.value = selected.workplace || "";
       setAuthMessage("Cadastro profissional carregado para edição.");
-      form.scrollIntoView({ behavior: "smooth", block: "start" });
+      openRegistrationPage("professional", true);
     });
   });
 }
@@ -1562,15 +1794,41 @@ function setPatientForm(patient) {
   form.elements.username.value = patient.username || "";
   form.elements.password.value = patient.password || "";
   form.elements.name.value = patient.name || "";
+  form.elements.phone.value = patient.phone || "";
   form.elements.age.value = patient.age || "";
   form.elements.sex.value = patient.sex || "";
   form.elements.city.value = patient.city || "";
   form.elements.address.value = patient.address || "";
   form.elements.therapyPlace.value = patient.therapyPlace || "";
+  if (patient.preferredService && !Array.from(form.elements.preferredService.options).some((option) => option.value === patient.preferredService)) {
+    form.elements.preferredService.add(new Option(patient.preferredService, patient.preferredService));
+  }
+  form.elements.preferredService.value = patient.preferredService || "";
   form.elements.notes.value = patient.notes || "";
   $("#patientFormTitle").textContent = "Editar cadastro do paciente";
   $("#savePatientBtn").textContent = "Atualizar paciente";
   $("#cancelPatientEditBtn").hidden = false;
+}
+
+function setProfessionalForm(item) {
+  const form = $("#professionalForm");
+  form.elements.id.value = item.id || "";
+  form.elements.username.value = item.username || "";
+  form.elements.password.value = item.password || "";
+  form.elements.name.value = item.name || "";
+  form.elements.registry.value = item.registry || "";
+  form.elements.city.value = item.city || "";
+  form.elements.workplace.value = item.workplace || "";
+  $("#professionalFormTitle").textContent = "Editar cadastro profissional";
+  $("#saveProfessionalBtn").textContent = "Atualizar meu cadastro";
+}
+
+function resetProfessionalForm() {
+  const form = $("#professionalForm");
+  form.reset();
+  form.elements.id.value = "";
+  $("#professionalFormTitle").textContent = "Cadastro profissional";
+  $("#saveProfessionalBtn").textContent = "Salvar profissional";
 }
 
 function resetPatientForm() {
@@ -1609,6 +1867,10 @@ function setAuthMessage(message) {
 }
 
 function renderLearning() {
+  if (!["professional", "admin"].includes(currentSession?.role)) {
+    $("#learningGrid").innerHTML = "";
+    return;
+  }
   $("#learningGrid").innerHTML = learning.map((item) => `
     <article class="learning-card">
       <h2>${item.title}</h2>
@@ -1679,6 +1941,14 @@ function saveStored(key, value) {
 
 function createId() {
   return globalThis.crypto?.randomUUID?.() || `patient-${Date.now()}-${Math.round(Math.random() * 10000)}`;
+}
+
+function formatPhone(value) {
+  const digits = String(value || "").replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits ? `(${digits}` : "";
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
 function escapeHTML(value) {

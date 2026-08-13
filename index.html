@@ -3,19 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0f766e" />
+    <meta name="theme-color" content="#0b6b75" />
     <title>Laser Oral Aid</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=17" />
-    <style>
-      @media (max-width: 980px) {
-        .app-shell { display: block; min-height: 100vh; }
-        .sidebar { height: auto !important; min-height: 0 !important; padding: 0 !important; position: static !important; }
-        .sidebar .brand, .sidebar .status-panel, .top-logos { display: none !important; }
-        .nav-list { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 !important; padding: 10px 12px !important; }
-        .nav-item { min-height: 40px; min-width: 0; padding: 9px 8px; text-align: center; white-space: normal; }
-      }
-    </style>
+    <link rel="stylesheet" href="styles.css?v=27" />
   </head>
   <body>
     <div class="app-shell">
@@ -31,12 +22,13 @@
         <nav class="nav-list" id="navList">
           <button class="nav-item active" data-view="home" type="button">Início</button>
           <button class="nav-item" data-view="patients" type="button">Acesso</button>
+          <button class="nav-item" data-view="tracking" type="button">Acompanhamento</button>
           <button class="nav-item" data-view="protocols" type="button">Protocolos</button>
           <button class="nav-item" data-view="simulator" type="button">Simulador</button>
           <button class="nav-item" data-view="calculator" type="button">Calculadoras</button>
           <button class="nav-item" data-view="devices" type="button">Equipamentos</button>
           <button class="nav-item" data-view="map" type="button">Rede de atendimento</button>
-          <button class="nav-item" data-view="learning" type="button">Ensino</button>
+          <button class="nav-item" data-view="learning" data-restricted-roles="professional,admin" type="button">Ensino</button>
           <button class="nav-item" data-view="assistant" type="button">Assistente IA</button>
         </nav>
 
@@ -87,17 +79,19 @@
         <section class="view active" id="homeView" aria-labelledby="pageTitle">
           <section class="home-hero">
             <div class="home-hero-copy">
-              <img class="home-app-logo" src="assets/laser-oral-aid.png" alt="Laser Oral Aid" />
-              <p class="eyebrow">Laserterapia odontológica</p>
-              <h2>Protocolos, pacientes e rede de atendimento.</h2>
-              <p>
-                Ferramentas essenciais para consulta clínica, simulação de parâmetros,
-                cadastro local e localização de serviços.
-              </p>
-              <div class="home-actions">
-                <button class="primary home-jump" data-view-target="patients" type="button">Entrar no app</button>
-                <button class="secondary home-jump" data-view-target="protocols" type="button">Ver protocolos</button>
+              <div class="home-hero-content">
+                <p class="eyebrow">Laserterapia odontológica</p>
+                <h2>Decisões clínicas mais claras, em um só lugar.</h2>
+                <p>
+                  Consulte protocolos, simule parâmetros, acompanhe pacientes e encontre
+                  serviços de referência com uma experiência simples e segura.
+                </p>
+                <div class="home-actions">
+                  <button class="primary home-jump" data-view-target="patients" type="button">Acessar plataforma</button>
+                  <button class="secondary home-jump" data-view-target="protocols" type="button">Explorar protocolos</button>
+                </div>
               </div>
+              <img class="home-app-logo" src="assets/laser-oral-aid.png" alt="Laser Oral Aid" />
             </div>
 
           </section>
@@ -250,6 +244,7 @@
                   <input name="password" autocomplete="current-password" type="password" placeholder="Senha" required />
                 </label>
                 <button class="primary" type="submit">Entrar como paciente</button>
+                <button class="recovery-link" data-recovery-role="patient" type="button">Esqueci minha senha</button>
               </form>
               <form class="form-grid stacked-form" id="professionalLoginForm">
                 <h3>Acesso do profissional</h3>
@@ -260,6 +255,7 @@
                   <input name="password" autocomplete="current-password" type="password" placeholder="Senha" required />
                 </label>
                 <button class="primary" type="submit">Entrar como profissional</button>
+                <button class="recovery-link" data-recovery-role="professional" type="button">Esqueci minha senha</button>
               </form>
               <form class="form-grid stacked-form" id="adminLoginForm">
                 <h3>Acesso admin</h3>
@@ -272,6 +268,42 @@
                 <button class="primary" type="submit">Entrar como admin</button>
               </form>
             </div>
+            <div class="registration-actions" aria-label="Criar novo cadastro">
+              <div>
+                <strong>Ainda não possui acesso?</strong>
+                <span>Crie seu cadastro em uma página separada.</span>
+              </div>
+              <button class="secondary" data-registration-role="patient" type="button">Cadastrar paciente</button>
+              <button class="secondary" data-registration-role="professional" type="button">Cadastrar profissional</button>
+            </div>
+            <section class="password-recovery" id="passwordRecoveryPanel" hidden>
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Recuperação de acesso</p>
+                  <h3 id="passwordRecoveryTitle">Redefinir senha</h3>
+                </div>
+                <button class="icon-button" id="closePasswordRecoveryBtn" aria-label="Fechar recuperação de senha" type="button">&times;</button>
+              </div>
+              <form class="form-grid" id="passwordRecoveryForm">
+                <input name="role" type="hidden" />
+                <label>Login
+                  <input name="username" autocomplete="username" required />
+                </label>
+                <label><span id="recoveryIdentifierLabel">Nome completo</span>
+                  <input name="identifier" required />
+                </label>
+                <label>Nova senha
+                  <input name="newPassword" autocomplete="new-password" minlength="6" type="password" required />
+                </label>
+                <label>Confirmar nova senha
+                  <input name="confirmPassword" autocomplete="new-password" minlength="6" type="password" required />
+                </label>
+                <div class="form-actions">
+                  <button class="primary" type="submit">Redefinir senha</button>
+                  <button class="secondary" id="cancelPasswordRecoveryBtn" type="button">Cancelar</button>
+                </div>
+              </form>
+            </section>
             <p class="auth-message" id="authMessage"></p>
           </section>
 
@@ -294,6 +326,9 @@
                 <label>Nome completo
                   <input name="name" placeholder="Nome do paciente" required />
                 </label>
+                <label>Telefone
+                  <input name="phone" autocomplete="tel" inputmode="tel" maxlength="15" placeholder="(82) 99999-9999" type="tel" required />
+                </label>
                 <label>Idade
                   <input name="age" type="number" min="0" max="120" placeholder="Ex.: 42" required />
                 </label>
@@ -315,6 +350,11 @@
                 <label>Onde realiza a laserterapia
                   <input name="therapyPlace" placeholder="Clinica, CEO, universidade ou hospital" required />
                 </label>
+                <label>Serviço de laserterapia de preferência
+                  <select name="preferredService" id="preferredServiceSelect" required>
+                    <option value="">Selecione uma unidade</option>
+                  </select>
+                </label>
                 <label>Observações de acompanhamento
                   <input name="notes" placeholder="Ex.: mucosite, DTM, pós-operatório..." />
                 </label>
@@ -329,7 +369,7 @@
               <div class="section-heading">
                 <div>
                   <p class="eyebrow">Módulo do profissional</p>
-                  <h2>Cadastro profissional</h2>
+                  <h2 id="professionalFormTitle">Cadastro profissional</h2>
                 </div>
               </div>
               <form class="form-grid stacked-form" id="professionalForm">
@@ -352,7 +392,7 @@
                 <label>Local de trabalho
                   <input name="workplace" placeholder="Clinica, UBS, universidade..." />
                 </label>
-                <button class="primary" type="submit">Salvar profissional</button>
+                <button class="primary" id="saveProfessionalBtn" type="submit">Salvar profissional</button>
               </form>
               <div class="professional-profile" id="professionalProfile"></div>
             </section>
@@ -364,22 +404,36 @@
                 <p class="eyebrow">Acompanhamento</p>
                 <h2 id="patientListTitle">Pacientes cadastrados na cidade do profissional</h2>
               </div>
-              <label class="compact-filter">Filtrar cidade
+              <label class="compact-filter"><span id="cityPatientFilterLabel">Filtrar cidade</span>
                 <input id="cityPatientFilter" placeholder="Cidade" />
               </label>
             </div>
             <div class="patient-list" id="patientList"></div>
           </section>
 
-          <section class="panel professionals-panel">
-            <div class="section-heading">
-              <div>
-                <p class="eyebrow">Administração</p>
-                <h2>Profissionais cadastrados</h2>
-              </div>
+        </section>
+
+        <section class="view" id="registrationView">
+          <section class="panel registration-page-header">
+            <div>
+              <p class="eyebrow">Novo acesso</p>
+              <h2 id="registrationPageTitle">Cadastro</h2>
+              <p class="muted" id="registrationPageDescription">Preencha seus dados para acessar a plataforma.</p>
             </div>
-            <div class="professional-list" id="professionalList"></div>
+            <button class="secondary" id="backToAccessBtn" type="button">Voltar para o acesso</button>
           </section>
+          <div id="registrationForms"></div>
+        </section>
+
+        <section class="view" id="trackingView">
+          <section class="panel tracking-intro">
+            <div>
+              <p class="eyebrow">Cuidado continuado</p>
+              <h2>Acompanhamento de pacientes</h2>
+              <p class="muted" id="trackingAccessSummary">Entre como profissional para consultar os pacientes cadastrados na sua cidade.</p>
+            </div>
+          </section>
+          <div id="trackingContent"></div>
         </section>
 
         <section class="view" id="calculatorView">
@@ -420,7 +474,7 @@
           <div class="layout two-col">
             <section class="panel">
               <div class="section-heading">
-                <h2>Unidades próximas</h2>
+                <h2>Unidades de referência</h2>
                 <label class="compact-filter">Cidade
                   <select id="serviceCityFilter" aria-label="Filtrar serviços por cidade"></select>
                 </label>
@@ -472,6 +526,6 @@
       </main>
     </div>
 
-    <script src="app.js?v=17" type="module"></script>
+    <script src="app.js?v=27" type="module"></script>
   </body>
 </html>

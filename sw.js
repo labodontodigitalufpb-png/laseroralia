@@ -1,9 +1,9 @@
-const CACHE_NAME = "laser-oral-aid-v17";
+const CACHE_NAME = "laser-oral-aid-v27";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=17",
-  "./app.js?v=17",
+  "./styles.css?v=27",
+  "./app.js?v=27",
   "./manifest.webmanifest",
   "./icon.svg",
   "./assets/ufal.jpg",
