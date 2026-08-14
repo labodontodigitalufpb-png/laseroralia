@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0b6b75" />
     <title>Laser Oral Aid</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=35" />
+    <link rel="stylesheet" href="styles.css?v=37" />
   </head>
   <body>
     <div class="app-shell">
@@ -625,6 +625,29 @@
             </div>
             <img src="assets/laser-oral-aid.png" alt="Laser Oral Aid" />
           </section>
+          <section class="panel learning-materials-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Biblioteca dos profissionais</p>
+                <h2>Materiais educacionais em PDF</h2>
+                <p class="muted">Compartilhe artigos, manuais e conteúdos de apoio com profissionais autenticados.</p>
+              </div>
+            </div>
+            <form class="material-upload-form" id="materialUploadForm">
+              <label>Título do material
+                <input name="title" maxlength="160" minlength="3" placeholder="Ex.: Guia de fotobiomodulação" required />
+              </label>
+              <label>Descrição (opcional)
+                <textarea name="description" maxlength="1000" rows="3" placeholder="Apresente brevemente o conteúdo do PDF"></textarea>
+              </label>
+              <label>Arquivo PDF (máximo 15 MB)
+                <input name="file" type="file" accept="application/pdf,.pdf" required />
+              </label>
+              <button class="primary" type="submit">Publicar PDF</button>
+            </form>
+            <p class="auth-message" id="materialMessage" role="status"></p>
+            <div class="material-list" id="materialList"></div>
+          </section>
           <div class="layout three-col" id="learningGrid"></div>
         </section>
 
@@ -652,6 +675,6 @@
       </main>
     </div>
 
-    <script src="app.js?v=36" type="module"></script>
+    <script src="app.js?v=37" type="module"></script>
   </body>
 </html>

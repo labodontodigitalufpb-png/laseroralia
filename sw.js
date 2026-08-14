@@ -1,9 +1,9 @@
-const CACHE_NAME = "laser-oral-aid-v36";
+const CACHE_NAME = "laser-oral-aid-v37";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=35",
-  "./app.js?v=36",
+  "./styles.css?v=37",
+  "./app.js?v=37",
   "./supabase-client.js",
   "./supabase-config.js",
   "./manifest.webmanifest",

@@ -18,7 +18,8 @@ Depois, acesse `http://localhost:4173`.
 - Cliente do navegador: `supabase-client.js`
 - URL e chave publicável: `supabase-config.js`
 - Histórico SQL: `supabase/migrations/`
-- Tabelas: `profiles`, `patients`, `professionals`, `availabilities` e `appointments`
+- Tabelas: `profiles`, `patients`, `professionals`, `availabilities`, `appointments` e `educational_materials`
+- PDFs educacionais: bucket privado `educational-materials` (máximo de 15 MB por arquivo)
 - Todas as tabelas possuem Row Level Security (RLS).
 - Senhas são gerenciadas exclusivamente pelo Supabase Auth.
 
@@ -56,6 +57,14 @@ commit;
 ```
 
 Depois da promoção, o acesso é feito no formulário **Acesso admin** com o mesmo e-mail e senha.
+Não há usuário ou senha administrativa fixa no código-fonte.
+
+## Materiais educacionais
+
+Profissionais e administradores autenticados podem publicar PDFs na seção **Ensino**. Os
+arquivos ficam em um bucket privado e são abertos por links temporários. O autor pode remover
+o próprio material e o administrador pode remover qualquer material. Antes de usar o recurso,
+aplique a migração `20260814144618_add_educational_materials.sql` no projeto Supabase.
 
 ## Dados locais anteriores
 

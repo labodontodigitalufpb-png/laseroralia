@@ -2,7 +2,9 @@ import {
   cancelAppointment as cancelRemoteAppointment,
   createAppointment as createRemoteAppointment,
   createAvailability as createRemoteAvailability,
+  createEducationalMaterialUrl,
   deleteAvailability as deleteRemoteAvailability,
+  deleteEducationalMaterial as deleteRemoteEducationalMaterial,
   getAccount,
   loadWorkspaceData,
   onAuthChange,
@@ -12,6 +14,7 @@ import {
   signIn,
   signOut,
   signUp,
+  uploadEducationalMaterial as uploadRemoteEducationalMaterial,
   updatePassword
 } from "./supabase-client.js";
 
@@ -661,6 +664,7 @@ let professional = null;
 let currentSession = null;
 let availabilities = [];
 let appointments = [];
+let educationalMaterials = [];
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -702,6 +706,7 @@ async function init() {
   bindAssistant();
   bindPatientModule();
   bindSchedule();
+  bindLearningMaterials();
   bindSupabaseSession();
   await refreshBackendData();
   renderProtocols();
@@ -722,6 +727,7 @@ async function refreshBackendData() {
   professionals = data.professionals;
   availabilities = data.availabilities;
   appointments = data.appointments;
+  educationalMaterials = data.educationalMaterials;
   professional = currentSession?.role === "professional"
     ? professionals.find((item) => item.id === currentSession.id) || null
     : null;
@@ -2253,6 +2259,7 @@ function setAuthMessage(message) {
 function renderLearning() {
   if (!["professional", "admin"].includes(currentSession?.role)) {
     $("#learningGrid").innerHTML = "";
+    $("#materialList").innerHTML = "";
     return;
   }
   $("#learningGrid").innerHTML = learning.map((item) => `
@@ -2261,6 +2268,107 @@ function renderLearning() {
       <p>${item.text}</p>
     </article>
   `).join("");
+  renderEducationalMaterials();
+}
+
+function bindLearningMaterials() {
+  $("#materialUploadForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const file = form.elements.file.files[0];
+    setFormBusy(form, true);
+    setMaterialMessage("Enviando PDF...");
+    try {
+      const material = await uploadRemoteEducationalMaterial(currentSession, {
+        title: String(data.get("title") || ""),
+        description: String(data.get("description") || ""),
+        file
+      });
+      educationalMaterials.unshift(material);
+      form.reset();
+      setMaterialMessage("Material publicado com sucesso.");
+      renderEducationalMaterials();
+    } catch (error) {
+      setMaterialMessage(error.message);
+    } finally {
+      setFormBusy(form, false);
+    }
+  });
+}
+
+function renderEducationalMaterials() {
+  const list = $("#materialList");
+  list.innerHTML = educationalMaterials.map((material) => {
+    const author = professionals.find((item) => item.id === material.authorId);
+    const canDelete = currentSession?.role === "admin" || currentSession?.id === material.authorId;
+    return `
+      <article class="material-card">
+        <div>
+          <h3>${escapeHTML(material.title)}</h3>
+          ${material.description ? `<p>${escapeHTML(material.description)}</p>` : ""}
+          <p class="material-meta">
+            ${escapeHTML(author?.name || "Profissional/administrador")} ·
+            ${escapeHTML(new Date(material.createdAt).toLocaleDateString("pt-BR"))} ·
+            ${escapeHTML(formatFileSize(material.fileSize))}
+          </p>
+          <small>${escapeHTML(material.originalFilename)}</small>
+        </div>
+        <div class="material-actions">
+          <button class="secondary" data-open-material="${material.id}" type="button">Abrir PDF</button>
+          ${canDelete ? `<button class="secondary material-delete" data-delete-material="${material.id}" type="button">Remover</button>` : ""}
+        </div>
+      </article>
+    `;
+  }).join("") || `<p class="muted">Nenhum PDF foi publicado ainda.</p>`;
+
+  $$('[data-open-material]').forEach((button) => {
+    button.addEventListener("click", async () => {
+      const material = educationalMaterials.find((item) => item.id === button.dataset.openMaterial);
+      if (!material) return;
+      button.disabled = true;
+      setMaterialMessage("Preparando acesso seguro ao PDF...");
+      try {
+        const url = await createEducationalMaterialUrl(material.storagePath);
+        const link = document.createElement("a");
+        link.href = url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.click();
+        setMaterialMessage("");
+      } catch (error) {
+        setMaterialMessage(error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
+  });
+
+  $$('[data-delete-material]').forEach((button) => {
+    button.addEventListener("click", async () => {
+      const material = educationalMaterials.find((item) => item.id === button.dataset.deleteMaterial);
+      if (!material || !window.confirm(`Remover o material “${material.title}”?`)) return;
+      button.disabled = true;
+      try {
+        await deleteRemoteEducationalMaterial(material);
+        educationalMaterials = educationalMaterials.filter((item) => item.id !== material.id);
+        setMaterialMessage("Material removido.");
+        renderEducationalMaterials();
+      } catch (error) {
+        setMaterialMessage(error.message);
+        button.disabled = false;
+      }
+    });
+  });
+}
+
+function setMaterialMessage(message) {
+  $("#materialMessage").textContent = message;
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1).replace(".0", "")} MB`;
 }
 
 function bindAssistant() {

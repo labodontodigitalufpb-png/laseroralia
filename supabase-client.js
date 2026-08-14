@@ -78,6 +78,19 @@ function appointmentFromRow(row) {
   };
 }
 
+function educationalMaterialFromRow(row) {
+  return {
+    id: row.id,
+    authorId: row.author_id,
+    title: row.title,
+    description: row.description,
+    storagePath: row.storage_path,
+    originalFilename: row.original_filename,
+    fileSize: Number(row.file_size),
+    createdAt: row.created_at
+  };
+}
+
 export async function getAccount() {
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
   if (sessionError) throw sessionError;
@@ -90,26 +103,102 @@ export async function getAccount() {
 }
 
 export async function loadWorkspaceData(account) {
-  if (!account) return { patients: [], professionals: [], availabilities: [], appointments: [] };
-  const [profileResult, patientResult, professionalResult, availabilityResult, appointmentResult] = await Promise.all([
+  if (!account) return { patients: [], professionals: [], availabilities: [], appointments: [], educationalMaterials: [] };
+  const canAccessLearning = ["professional", "admin"].includes(account.role);
+  const [profileResult, patientResult, professionalResult, availabilityResult, appointmentResult, materialResult] = await Promise.all([
     supabase.from("profiles").select("id, email"),
     supabase.from("patients").select("*").order("created_at", { ascending: false }),
     supabase.from("professionals").select("*").order("name"),
     supabase.from("availabilities").select("*").order("appointment_date"),
-    supabase.from("appointments").select("*").order("appointment_date")
+    supabase.from("appointments").select("*").order("appointment_date"),
+    canAccessLearning
+      ? supabase.from("educational_materials").select("*").order("created_at", { ascending: false })
+      : Promise.resolve({ data: [], error: null })
   ]);
   const profileRows = assertNoError(profileResult, "Não foi possível carregar os perfis.");
   const patientRows = assertNoError(patientResult, "Não foi possível carregar pacientes.");
   const professionalRows = assertNoError(professionalResult, "Não foi possível carregar profissionais.");
   const availabilityRows = assertNoError(availabilityResult, "Não foi possível carregar horários.");
   const appointmentRows = assertNoError(appointmentResult, "Não foi possível carregar agendamentos.");
+  const materialRows = assertNoError(materialResult, "Não foi possível carregar os materiais educacionais.");
   const emailById = new Map(profileRows.map((row) => [row.id, row.email]));
   return {
     patients: patientRows.map((row) => patientFromRow(row, emailById.get(row.id) || "")),
     professionals: professionalRows.map((row) => professionalFromRow(row, emailById.get(row.id) || "")),
     availabilities: availabilityRows.map(availabilityFromRow),
-    appointments: appointmentRows.map(appointmentFromRow)
+    appointments: appointmentRows.map(appointmentFromRow),
+    educationalMaterials: materialRows.map(educationalMaterialFromRow)
   };
+}
+
+export async function uploadEducationalMaterial(account, { title, description, file }) {
+  if (!account || !["professional", "admin"].includes(account.role)) {
+    throw new Error("Apenas profissionais e administradores podem publicar materiais.");
+  }
+  const normalizedTitle = title.trim();
+  const normalizedDescription = description.trim();
+  if (normalizedTitle.length < 3 || normalizedTitle.length > 160) {
+    throw new Error("Informe um título entre 3 e 160 caracteres.");
+  }
+  if (normalizedDescription.length > 1000) {
+    throw new Error("A descrição deve ter no máximo 1.000 caracteres.");
+  }
+  if (!(file instanceof File) || file.type !== "application/pdf" || !file.name.toLowerCase().endsWith(".pdf")) {
+    throw new Error("Selecione um arquivo PDF válido.");
+  }
+  if (file.size < 1 || file.size > 15 * 1024 * 1024) {
+    throw new Error("O PDF deve ter no máximo 15 MB.");
+  }
+  if (await file.slice(0, 5).text() !== "%PDF-") {
+    throw new Error("O conteúdo do arquivo selecionado não corresponde a um PDF.");
+  }
+
+  const storagePath = `${account.id}/${crypto.randomUUID()}.pdf`;
+  assertNoError(
+    await supabase.storage.from("educational-materials").upload(storagePath, file, {
+      cacheControl: "3600",
+      contentType: "application/pdf",
+      upsert: false
+    }),
+    "Não foi possível enviar o PDF."
+  );
+
+  try {
+    const row = assertNoError(
+      await supabase.from("educational_materials").insert({
+        author_id: account.id,
+        title: normalizedTitle,
+        description: normalizedDescription,
+        storage_path: storagePath,
+        original_filename: file.name.slice(0, 255),
+        file_size: file.size
+      }).select().single(),
+      "Não foi possível registrar o material."
+    );
+    return educationalMaterialFromRow(row);
+  } catch (error) {
+    await supabase.storage.from("educational-materials").remove([storagePath]);
+    throw error;
+  }
+}
+
+export async function createEducationalMaterialUrl(storagePath) {
+  const data = assertNoError(
+    await supabase.storage.from("educational-materials").createSignedUrl(storagePath, 60),
+    "Não foi possível abrir o PDF."
+  );
+  return data.signedUrl;
+}
+
+export async function deleteEducationalMaterial(material) {
+  assertNoError(
+    await supabase.storage.from("educational-materials").remove([material.storagePath]),
+    "Não foi possível remover o arquivo."
+  );
+  assertNoError(
+    await supabase.from("educational_materials").delete().eq("id", material.id),
+    "O arquivo foi removido, mas não foi possível excluir seu registro."
+  );
 }
 
 export async function signIn(email, password, expectedRole) {
