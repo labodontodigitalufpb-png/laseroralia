@@ -1,3 +1,20 @@
+import {
+  cancelAppointment as cancelRemoteAppointment,
+  createAppointment as createRemoteAppointment,
+  createAvailability as createRemoteAvailability,
+  deleteAvailability as deleteRemoteAvailability,
+  getAccount,
+  loadWorkspaceData,
+  onAuthChange,
+  savePatientRecord,
+  saveProfessionalRecord,
+  sendPasswordReset,
+  signIn,
+  signOut,
+  signUp,
+  updatePassword
+} from "./supabase-client.js";
+
 const devices = [
   {
     id: "mmoptics-laser-duo",
@@ -619,6 +636,13 @@ const services = [
   }
 ];
 
+const customServices = loadStored("laserOralAidCustomServices", []);
+if (Array.isArray(customServices)) {
+  customServices.forEach((customService) => {
+    if (!services.some((service) => String(service.name).localeCompare(String(customService.name), "pt-BR", { sensitivity: "base" }) === 0)) services.push(customService);
+  });
+}
+
 const learning = [
   { title: "Atlas clinico ilustrado", text: "Galeria curada para mucosite, aftas, herpes, liquen plano, candidose, peri-implantite e complicacoes cirurgicas." },
   { title: "Videos demonstrativos", text: "Aplicacao pontual, varredura, protecao ocular, preparo da fibra e fluxo de biosseguranca." },
@@ -631,31 +655,12 @@ const learning = [
 let selectedProtocol = protocols[0];
 let selectedDevice = devices[0];
 let selectedService = services[0];
-let patients = loadStored("laserOralAidPatients", [
-  {
-    id: "sample-joao-pessoa",
-    username: "paciente",
-    password: "1234",
-    name: "Paciente exemplo",
-    phone: "(83) 99999-9999",
-    preferredService: "Faculdade de Odontologia da Universidade Federal de Alagoas (FOUFAL)",
-    age: "46",
-    sex: "Feminino",
-    city: "Joao Pessoa",
-    address: "Bairro Centro",
-    therapyPlace: "Hospital Universitario - Servico de Estomatologia",
-    notes: "Acompanhamento de mucosite oral",
-    createdAt: new Date().toISOString()
-  }
-]);
-const adminProfile = {
-  username: "maceio",
-  password: "maceio",
-  name: "Administrador"
-};
-let professionals = loadStored("laserOralAidProfessionals", null);
-let professional = loadStored("laserOralAidProfessional", null);
-let currentSession = loadStored("laserOralAidSession", null);
+let patients = [];
+let professionals = [];
+let professional = null;
+let currentSession = null;
+let availabilities = [];
+let appointments = [];
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -673,6 +678,7 @@ const viewTitles = {
   patients: "Acesso",
   registration: "Cadastro",
   tracking: "Acompanhamento",
+  schedule: "Agenda",
   calculator: "Calculadoras",
   devices: "Equipamentos",
   map: "Rede de atendimento",
@@ -680,14 +686,12 @@ const viewTitles = {
   assistant: "Assistente IA"
 };
 
-function init() {
+async function init() {
   localizeTextRecords([devices, protocols, services, learning, patients]);
-  validateSession();
-  migratePatientAccess();
-  migrateProfessionalAccess();
   populateDevices();
   populateDatalist();
   populatePreferredServices();
+  populateProfessionalServices();
   setupRegistrationPage();
   setupTrackingPage();
   bindNavigation();
@@ -697,53 +701,42 @@ function init() {
   bindMap();
   bindAssistant();
   bindPatientModule();
+  bindSchedule();
+  bindSupabaseSession();
+  await refreshBackendData();
   renderProtocols();
   renderProtocolDetail(selectedProtocol);
   renderDevices();
   renderServices();
   renderLearning();
   renderPatientModule();
+  renderSchedule();
   renderSummary();
   registerServiceWorker();
 }
 
-function validateSession() {
-  if (currentSession?.role === "patient" && !patients.some((patient) => patient.id === currentSession.id)) {
-    currentSession = null;
-  }
-  if (currentSession?.role === "professional" && !getCurrentProfessional()) {
-    currentSession = null;
-  }
-  if (currentSession?.role === "admin" && !isAdminSession(currentSession)) currentSession = null;
-  saveStored("laserOralAidSession", currentSession);
+async function refreshBackendData() {
+  currentSession = await getAccount();
+  const data = await loadWorkspaceData(currentSession);
+  patients = data.patients;
+  professionals = data.professionals;
+  availabilities = data.availabilities;
+  appointments = data.appointments;
+  professional = currentSession?.role === "professional"
+    ? professionals.find((item) => item.id === currentSession.id) || null
+    : null;
+  $("#syncStatus").textContent = currentSession ? "Supabase sincronizado" : "Supabase conectado";
 }
 
-function migratePatientAccess() {
-  let changed = false;
-  patients = patients.map((patient, index) => {
-    if (patient.username && patient.password && "preferredService" in patient) return patient;
-    changed = true;
-    return {
-      ...patient,
-      username: patient.username || (index === 0 ? "paciente" : `paciente${index + 1}`),
-      password: patient.password || "1234",
-      preferredService: patient.preferredService || ""
-    };
+function bindSupabaseSession() {
+  onAuthChange((event) => {
+    if (event !== "PASSWORD_RECOVERY") return;
+    $("#passwordRecoveryPanel").hidden = false;
+    $("#passwordRecoveryForm").hidden = true;
+    $("#passwordUpdateForm").hidden = false;
+    $("#passwordRecoveryTitle").textContent = "Crie uma nova senha";
+    activateView("patients");
   });
-  if (changed) saveStored("laserOralAidPatients", patients);
-}
-
-function migrateProfessionalAccess() {
-  if (!Array.isArray(professionals)) {
-    professionals = professional ? [{ ...professional, id: professional.id || createId() }] : [];
-    if (currentSession?.role === "professional" && !currentSession.id && professionals[0]) {
-      currentSession = { role: "professional", id: professionals[0].id };
-      saveStored("laserOralAidSession", currentSession);
-    }
-    saveStored("laserOralAidProfessionals", professionals);
-  }
-  professional = getCurrentProfessional() || professionals[0] || null;
-  if (professional) saveStored("laserOralAidProfessional", professional);
 }
 
 function localizeTextRecords(collections) {
@@ -937,6 +930,79 @@ function populatePreferredServices() {
   ].join("");
 }
 
+function populateProfessionalServices() {
+  $("#professionalServiceChecklist").innerHTML = services
+    .filter((service) => service.laser)
+    .map((service) => serviceCheckboxHTML(service.name, getServiceCity(service)))
+    .join("");
+}
+
+function serviceCheckboxHTML(name, detail = "Unidade adicionada pelo profissional") {
+  return `<label class="service-check-option">
+    <input name="serviceNames" type="checkbox" value="${escapeHTML(name)}" />
+    <span><strong>${escapeHTML(name)}</strong><small>${escapeHTML(detail)}</small></span>
+  </label>`;
+}
+
+function addProfessionalService() {
+  const fields = {
+    name: $("#newProfessionalServiceName"),
+    type: $("#newProfessionalServiceType"),
+    city: $("#newProfessionalServiceCity"),
+    state: $("#newProfessionalServiceState"),
+    address: $("#newProfessionalServiceAddress"),
+    phone: $("#newProfessionalServicePhone")
+  };
+  const name = fields.name.value.trim();
+  const city = fields.city.value.trim();
+  const state = fields.state.value.trim().toUpperCase();
+  const streetAddress = fields.address.value.trim();
+  if (name.length < 3 || !city || !/^[A-Z]{2}$/.test(state) || streetAddress.length < 5) {
+    $("#newServiceMessage").textContent = "Informe nome, cidade, UF com 2 letras e endereço da unidade.";
+    fields.name.focus();
+    return;
+  }
+  const checkboxes = Array.from($("#professionalServiceChecklist").querySelectorAll('[name="serviceNames"]'));
+  const existing = checkboxes.find((checkbox) => normalize(checkbox.value) === normalize(name));
+  if (existing) {
+    existing.checked = true;
+    existing.closest(".service-check-option")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    $("#newServiceMessage").textContent = "Essa unidade já estava na lista e foi marcada.";
+  } else {
+    const checkedNames = checkboxes.filter((checkbox) => checkbox.checked).map((checkbox) => checkbox.value);
+    const newService = {
+      id: createId("service"),
+      name,
+      type: fields.type.value,
+      category: "Unidade cadastrada pelo profissional",
+      specialties: "Atendimento odontológico com laserterapia.",
+      laser: true,
+      address: `${streetAddress}, ${city}-${state}`,
+      city,
+      state,
+      phone: formatPhone(fields.phone.value),
+      access: "Agendamento direto pelo aplicativo",
+      hours: "Consultar horários disponíveis na agenda",
+      distance: 0,
+      custom: true,
+      createdAt: new Date().toISOString()
+    };
+    services.push(newService);
+    saveStored("laserOralAidCustomServices", services.filter((service) => service.custom));
+    populateProfessionalServices();
+    $("#professionalServiceChecklist").querySelectorAll('[name="serviceNames"]').forEach((checkbox) => {
+      checkbox.checked = checkedNames.includes(checkbox.value) || checkbox.value === name;
+    });
+    populatePreferredServices();
+    populateServiceCityFilter();
+    $("#serviceCityFilter").value = city;
+    selectedService = newService;
+    renderServices();
+    $("#newServiceMessage").textContent = "Nova unidade adicionada à Rede de atendimento e marcada neste cadastro.";
+  }
+  [fields.name, fields.city, fields.state, fields.address, fields.phone].forEach((field) => { field.value = ""; });
+}
+
 function bindNavigation() {
   $$("#navList .nav-item").forEach((button) => {
     button.addEventListener("click", () => {
@@ -958,6 +1024,7 @@ function activateView(view) {
   const activeView = $(`#${view}View`);
   activeView.classList.add("active");
   $("#pageTitle").textContent = viewTitles[view] || "Laser Oral Aid";
+  if (view === "schedule") renderSchedule();
   if (matchMedia("(max-width: 980px)").matches) {
     activeView.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -1242,13 +1309,19 @@ function renderDevices() {
 }
 
 function bindMap() {
+  populateServiceCityFilter();
+  $("#serviceCityFilter").addEventListener("change", renderServices);
+  $$(".filters input").forEach((input) => input.addEventListener("change", renderServices));
+}
+
+function populateServiceCityFilter() {
+  const previousCity = $("#serviceCityFilter").value || "all";
   const cities = Array.from(new Set(services.map((service) => getServiceCity(service)).filter(Boolean))).sort((a, b) => a.localeCompare(b));
   $("#serviceCityFilter").innerHTML = [
     `<option value="all">Todas as cidades</option>`,
     ...cities.map((city) => `<option value="${escapeHTML(city)}">${escapeHTML(city)}</option>`)
   ].join("");
-  $("#serviceCityFilter").addEventListener("change", renderServices);
-  $$(".filters input").forEach((input) => input.addEventListener("change", renderServices));
+  $("#serviceCityFilter").value = cities.includes(previousCity) ? previousCity : "all";
 }
 
 function renderServices() {
@@ -1263,12 +1336,12 @@ function renderServices() {
   renderMapPanel(selectedService);
   $("#serviceList").innerHTML = filtered.map((service) => `
     <article class="service-card">
-      <strong>${service.name}</strong>
-      <span>${service.type} · ${service.category || "Serviço odontológico"}</span>
-      <p>${service.specialties}</p>
-      <p>${service.address}<br>${[service.phone, service.email].filter(Boolean).join(" · ")}<br>${service.hours}</p>
+      <strong>${escapeHTML(service.name)}</strong>
+      <span>${escapeHTML(service.type)} · ${escapeHTML(service.category || "Serviço odontológico")}</span>
+      <p>${escapeHTML(service.specialties)}</p>
+      <p>${escapeHTML(service.address)}<br>${escapeHTML([service.phone, service.email].filter(Boolean).join(" · "))}<br>${escapeHTML(service.hours)}</p>
       <div class="badge-row">
-        <span class="badge">${service.distance} km</span>
+        <span class="badge">${service.custom ? "Unidade cadastrada" : `${service.distance} km`}</span>
         <span class="badge ${service.laser ? "" : "warn"}">${service.laser ? "Laserterapia cadastrada" : "Sem laser cadastrado"}</span>
         ${service.access ? `<span class="badge">${escapeHTML(service.access)}</span>` : ""}
         <button class="badge map-select ${service === selectedService ? "active" : ""}" data-service-name="${escapeHTML(service.name)}" type="button">Ver mapa</button>
@@ -1288,7 +1361,8 @@ function renderServices() {
 }
 
 function getServiceCity(service) {
-  const match = service.address.match(/,\s*([^,]+?)-(?:AL|PB|MG)\b/);
+  if (service.city) return service.city;
+  const match = service.address.match(/,\s*([^,]+?)-[A-Z]{2}\b/);
   return match ? match[1].trim() : "";
 }
 
@@ -1318,83 +1392,36 @@ function bindPatientModule() {
     event.currentTarget.value = formatPhone(event.currentTarget.value);
   });
 
+  $("#addProfessionalServiceBtn").addEventListener("click", addProfessionalService);
+  $("#newProfessionalServiceName").addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    addProfessionalService();
+  });
+  $("#newProfessionalServiceState").addEventListener("input", (event) => {
+    event.currentTarget.value = event.currentTarget.value.replace(/[^a-z]/gi, "").slice(0, 2).toUpperCase();
+  });
+
   $$('[data-recovery-role]').forEach((button) => {
     button.addEventListener('click', () => openPasswordRecovery(button.dataset.recoveryRole));
   });
   $('#closePasswordRecoveryBtn').addEventListener('click', closePasswordRecovery);
   $('#cancelPasswordRecoveryBtn').addEventListener('click', closePasswordRecovery);
   $('#passwordRecoveryForm').addEventListener('submit', handlePasswordRecovery);
+  $('#passwordUpdateForm').addEventListener('submit', handlePasswordUpdate);
 
-  $("#patientLoginForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget));
-    const patient = patients.find((item) => item.username === data.username.trim() && item.password === data.password);
-    if (!patient) {
-      setAuthMessage("Login ou senha do paciente não conferem.");
-      return;
-    }
-    currentSession = { role: "patient", id: patient.id };
-    saveStored("laserOralAidSession", currentSession);
-    event.currentTarget.reset();
-    setAuthMessage("Paciente conectado.");
-    setPatientForm(patient);
-    renderPatientModule();
-    renderSummary();
-    activateView("patients");
-  });
+  $("#patientLoginForm").addEventListener("submit", (event) => handleLogin(event, "patient"));
+  $("#professionalLoginForm").addEventListener("submit", (event) => handleLogin(event, "professional"));
+  $("#adminLoginForm").addEventListener("submit", (event) => handleLogin(event, "admin"));
 
-  $("#professionalLoginForm").addEventListener("submit", (event) => {
+  $("#patientForm").addEventListener("submit", async (event) => {
     event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget));
-    const loggedProfessional = professionals.find((item) => item.username === data.username.trim() && item.password === data.password);
-    if (!loggedProfessional) {
-      setAuthMessage("Login ou senha do profissional não conferem.");
-      return;
-    }
-    professional = loggedProfessional;
-    saveStored("laserOralAidProfessional", professional);
-    currentSession = { role: "professional", id: loggedProfessional.id };
-    saveStored("laserOralAidSession", currentSession);
-    event.currentTarget.reset();
-    setAuthMessage("Profissional conectado.");
-    renderPatientModule();
-    renderSummary();
-  });
-
-  $("#adminLoginForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget));
-    const valid = data.username.trim() === adminProfile.username && data.password === adminProfile.password;
-    if (!valid) {
-      setAuthMessage("Login ou senha do admin não conferem.");
-      return;
-    }
-    currentSession = { role: "admin", username: adminProfile.username };
-    saveStored("laserOralAidSession", currentSession);
-    event.currentTarget.reset();
-    setAuthMessage("Admin conectado. Você pode ver todos os pacientes e profissionais.");
-    renderPatientModule();
-    renderSummary();
-  });
-
-  $("#patientForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const form = event.currentTarget;
+    const data = Object.fromEntries(new FormData(form));
     const id = currentSession?.role === "patient" ? currentSession.id : data.id || "";
-    if (currentSession?.role === "patient" && !patients.some((item) => item.id === id)) {
-      setAuthMessage("Não foi possível localizar seu cadastro para edição.");
-      return;
-    }
-    const username = data.username.trim();
-    const duplicate = patients.some((patient) => patient.username === username && patient.id !== id);
-    if (duplicate) {
-      setAuthMessage("Este login de paciente já está em uso.");
-      return;
-    }
     const patient = {
-      id: id || createId(),
-      username,
-      password: data.password,
+      id,
+      email: data.email.trim(),
       name: data.name.trim(),
       phone: formatPhone(data.phone),
       age: data.age.trim(),
@@ -1404,66 +1431,84 @@ function bindPatientModule() {
       therapyPlace: data.therapyPlace.trim(),
       preferredService: data.preferredService,
       notes: data.notes.trim(),
-      createdAt: patients.find((item) => item.id === id)?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: patients.find((item) => item.id === id)?.createdAt
     };
-    patients = id
-      ? patients.map((item) => item.id === id ? patient : item)
-      : [patient, ...patients];
-    saveStored("laserOralAidPatients", patients);
-    if (!currentSession || currentSession.role === "patient") {
-      currentSession = { role: "patient", id: patient.id };
-      saveStored("laserOralAidSession", currentSession);
+    setFormBusy(form, true);
+    try {
+      if (!id) {
+        if (currentSession) throw new Error("Saia da sessão atual antes de criar outro acesso.");
+        const result = await signUp("patient", data);
+        form.reset();
+        setAuthMessage(result.requiresConfirmation
+          ? `Cadastro criado. Confirme o e-mail enviado para ${result.email}.`
+          : "Cadastro criado e conectado com segurança.");
+        if (!result.requiresConfirmation) await refreshBackendData();
+      } else {
+        const saved = await savePatientRecord(patient);
+        patients = patients.map((item) => item.id === saved.id ? saved : item);
+        setPatientForm(saved);
+        setAuthMessage("Cadastro do paciente atualizado no Supabase.");
+      }
+      renderPatientModule();
+      renderSummary();
+      activateView("patients");
+    } catch (error) {
+      setAuthMessage(error.message);
+    } finally {
+      setFormBusy(form, false);
     }
-    setAuthMessage(id ? "Cadastro do paciente atualizado." : "Paciente cadastrado e conectado.");
-    setPatientForm(patient);
-    renderPatientModule();
-    renderSummary();
-    activateView("patients");
   });
 
-  $("#professionalForm").addEventListener("submit", (event) => {
+  $("#professionalForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     if (currentSession?.role === "patient") {
       setAuthMessage("O paciente pode editar apenas o próprio cadastro.");
       return;
     }
-    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const form = event.currentTarget;
+    const data = Object.fromEntries(new FormData(form));
+    const selectedServices = Array.from(form.querySelectorAll('[name="serviceNames"]:checked')).map((input) => input.value);
+    const serviceNames = [...new Set(selectedServices)];
+    if (!serviceNames.length) {
+      setAuthMessage("Selecione ou informe pelo menos uma unidade que ofereça laserterapia.");
+      return;
+    }
     const id = currentSession?.role === "professional" ? currentSession.id : data.id || "";
-    if (currentSession?.role === "professional" && !professionals.some((item) => item.id === id)) {
-      setAuthMessage("Não foi possível localizar seu cadastro profissional para edição.");
-      return;
-    }
-    const username = data.username.trim();
-    const duplicate = professionals.some((item) => item.username === username && item.id !== id);
-    if (duplicate) {
-      setAuthMessage("Este login profissional já está em uso.");
-      return;
-    }
     professional = {
-      id: id || createId(),
-      username,
-      password: data.password,
+      id,
+      email: data.email.trim(),
       name: data.name.trim(),
       registry: data.registry.trim(),
       city: data.city.trim(),
       workplace: data.workplace.trim(),
-      updatedAt: new Date().toISOString()
+      serviceNames,
+      serviceName: serviceNames[0]
     };
-    professionals = id
-      ? professionals.map((item) => item.id === id ? professional : item)
-      : [professional, ...professionals];
-    saveStored("laserOralAidProfessionals", professionals);
-    saveStored("laserOralAidProfessional", professional);
-    if (currentSession?.role !== "admin") {
-      currentSession = { role: "professional", id: professional.id };
-      saveStored("laserOralAidSession", currentSession);
-      $("#cityPatientFilter").value = professional.city;
+    setFormBusy(form, true);
+    try {
+      if (!id) {
+        if (currentSession) throw new Error("Saia da sessão atual antes de criar outro acesso.");
+        const result = await signUp("professional", data, serviceNames);
+        form.reset();
+        setAuthMessage(result.requiresConfirmation
+          ? `Cadastro criado. Confirme o e-mail enviado para ${result.email}.`
+          : "Cadastro profissional criado e conectado com segurança.");
+        if (!result.requiresConfirmation) await refreshBackendData();
+      } else {
+        const saved = await saveProfessionalRecord(professional);
+        professionals = professionals.map((item) => item.id === saved.id ? saved : item);
+        professional = saved;
+        setProfessionalForm(saved);
+        setAuthMessage("Cadastro profissional atualizado no Supabase.");
+      }
+      renderPatientModule();
+      renderSummary();
+      activateView("patients");
+    } catch (error) {
+      setAuthMessage(error.message);
+    } finally {
+      setFormBusy(form, false);
     }
-    setAuthMessage(currentSession?.role === "admin" ? "Cadastro profissional salvo." : "Cadastro profissional salvo e conectado.");
-    renderPatientModule();
-    renderSummary();
-    activateView("patients");
   });
 
   $("#cancelPatientEditBtn").addEventListener("click", () => {
@@ -1482,68 +1527,86 @@ function bindPatientModule() {
 }
 
 function openPasswordRecovery(role) {
-  const isPatient = role === "patient";
-  const loginForm = isPatient ? $("#patientLoginForm") : $("#professionalLoginForm");
+  const loginForm = role === "patient" ? $("#patientLoginForm") : $("#professionalLoginForm");
   const form = $("#passwordRecoveryForm");
   form.reset();
-  form.elements.role.value = isPatient ? "patient" : "professional";
-  form.elements.username.value = loginForm.elements.username.value.trim();
-  $("#passwordRecoveryTitle").textContent = isPatient ? "Redefinir senha do paciente" : "Redefinir senha do profissional";
-  $("#recoveryIdentifierLabel").textContent = isPatient ? "Nome completo" : "Registro profissional";
-  form.elements.identifier.placeholder = isPatient ? "Nome informado no cadastro" : "CRO, matrícula ou identificador";
+  form.hidden = false;
+  $("#passwordUpdateForm").hidden = true;
+  form.elements.email.value = loginForm.elements.email.value.trim();
+  $("#passwordRecoveryTitle").textContent = "Recuperar acesso";
   $("#passwordRecoveryPanel").hidden = false;
-  setAuthMessage("Confirme seus dados para criar uma nova senha.");
-  (form.elements.username.value ? form.elements.identifier : form.elements.username).focus();
+  setAuthMessage("Enviaremos um link seguro para redefinir sua senha.");
+  form.elements.email.focus();
 }
 
 function closePasswordRecovery() {
   $("#passwordRecoveryForm").reset();
+  $("#passwordRecoveryForm").hidden = false;
+  $("#passwordUpdateForm").reset();
+  $("#passwordUpdateForm").hidden = true;
   $("#passwordRecoveryPanel").hidden = true;
 }
 
-function handlePasswordRecovery(event) {
+async function handlePasswordRecovery(event) {
   event.preventDefault();
   const form = event.currentTarget;
   const data = Object.fromEntries(new FormData(form));
-  const username = data.username.trim();
-  const identifier = normalize(data.identifier);
+  setFormBusy(form, true);
+  try {
+    await sendPasswordReset(data.email);
+    closePasswordRecovery();
+    setAuthMessage("Link de recuperação enviado. Verifique sua caixa de entrada.");
+  } catch (error) {
+    setAuthMessage(error.message);
+  } finally {
+    setFormBusy(form, false);
+  }
+}
+
+async function handlePasswordUpdate(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const data = Object.fromEntries(new FormData(form));
   if (data.newPassword !== data.confirmPassword) {
     setAuthMessage("A confirmação não corresponde à nova senha.");
-    form.elements.confirmPassword.focus();
     return;
   }
-
-  if (data.role === "patient") {
-    const patient = patients.find((item) => item.username === username && normalize(item.name) === identifier);
-    if (!patient) {
-      setAuthMessage("Não foi possível confirmar o login e o nome do paciente.");
-      return;
-    }
-    patients = patients.map((item) => item.id === patient.id
-      ? { ...item, password: data.newPassword, updatedAt: new Date().toISOString() }
-      : item);
-    saveStored("laserOralAidPatients", patients);
-  } else {
-    const recoveredProfessional = professionals.find((item) => item.username === username && normalize(item.registry) === identifier);
-    if (!recoveredProfessional) {
-      setAuthMessage("Não foi possível confirmar o login e o registro profissional.");
-      return;
-    }
-    professionals = professionals.map((item) => item.id === recoveredProfessional.id
-      ? { ...item, password: data.newPassword, updatedAt: new Date().toISOString() }
-      : item);
-    if (professional?.id === recoveredProfessional.id) {
-      professional = professionals.find((item) => item.id === recoveredProfessional.id);
-      saveStored("laserOralAidProfessional", professional);
-    }
-    saveStored("laserOralAidProfessionals", professionals);
+  setFormBusy(form, true);
+  try {
+    await updatePassword(data.newPassword);
+    closePasswordRecovery();
+    setAuthMessage("Senha atualizada com segurança.");
+  } catch (error) {
+    setAuthMessage(error.message);
+  } finally {
+    setFormBusy(form, false);
   }
+}
 
-  closePasswordRecovery();
-  setAuthMessage("Senha redefinida. Use a nova senha para entrar.");
-  const loginForm = data.role === "patient" ? $("#patientLoginForm") : $("#professionalLoginForm");
-  loginForm.elements.username.value = username;
-  loginForm.elements.password.focus();
+async function handleLogin(event, expectedRole) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const data = Object.fromEntries(new FormData(form));
+  setFormBusy(form, true);
+  try {
+    await signIn(data.email, data.password, expectedRole);
+    await refreshBackendData();
+    form.reset();
+    setAuthMessage("Acesso autenticado e dados sincronizados.");
+    renderPatientModule();
+    renderSummary();
+    activateView("patients");
+  } catch (error) {
+    setAuthMessage(error.message);
+  } finally {
+    setFormBusy(form, false);
+  }
+}
+
+function setFormBusy(form, busy) {
+  form.querySelectorAll("button, input, select, textarea").forEach((field) => {
+    field.disabled = busy;
+  });
 }
 
 function renderPatientModule() {
@@ -1565,6 +1628,7 @@ function renderPatientModule() {
   renderProfessionalProfile();
   renderPatientList();
   renderProfessionalList();
+  renderSchedule();
 }
 
 function updateRoleNavigation() {
@@ -1603,8 +1667,8 @@ function renderSessionBox() {
     `;
   } else if (currentSession?.role === "admin") {
     box.innerHTML = `
-      <strong>Admin conectado: ${escapeHTML(adminProfile.name)}</strong>
-      <span>Acesso a todos os pacientes e profissionais cadastrados neste dispositivo.</span>
+      <strong>Administrador conectado</strong>
+      <span>${escapeHTML(currentSession.email)} · acesso protegido pelo Supabase.</span>
       <button class="secondary" id="logoutBtn" type="button">Sair</button>
     `;
   } else {
@@ -1624,13 +1688,22 @@ function renderSessionBox() {
     }
   });
   $("#openTrackingBtn")?.addEventListener("click", () => activateView("tracking"));
-  $("#logoutBtn")?.addEventListener("click", () => {
-    currentSession = null;
-    saveStored("laserOralAidSession", currentSession);
-    setAuthMessage("Sessão encerrada.");
-    resetPatientForm();
-    renderPatientModule();
-    renderSummary();
+  $("#logoutBtn")?.addEventListener("click", async () => {
+    try {
+      await signOut();
+      currentSession = null;
+      patients = [];
+      professionals = [];
+      professional = null;
+      availabilities = [];
+      appointments = [];
+      setAuthMessage("Sessão encerrada.");
+      resetPatientForm();
+      renderPatientModule();
+      renderSummary();
+    } catch (error) {
+      setAuthMessage(error.message);
+    }
   });
 }
 
@@ -1646,8 +1719,9 @@ function renderProfessionalProfile() {
   }
   profile.innerHTML = `
     <strong>${escapeHTML(professional.name)}</strong>
-    <p class="muted">${escapeHTML(professional.registry)} · ${escapeHTML(professional.city)} · login ${escapeHTML(professional.username || "não definido")}</p>
-    <p>${escapeHTML(professional.workplace || "Local de trabalho não informado")}</p>
+    <p class="muted">${escapeHTML(professional.registry)} · ${escapeHTML(professional.city)} · ${escapeHTML(professional.email || "e-mail protegido")}</p>
+    <p>${escapeHTML(getProfessionalServiceNames(professional).join(" · ") || "Serviço de atendimento não selecionado")}</p>
+    <p class="muted">${escapeHTML(professional.workplace || "Local de trabalho não informado")}</p>
   `;
 }
 
@@ -1704,8 +1778,7 @@ function renderPatientList() {
         <dt>Observações</dt><dd>${escapeHTML(patient.notes || "Sem observações")}</dd>
       </dl>
       <div class="patient-actions">
-        <button class="secondary" data-edit-patient="${patient.id}" type="button">Editar</button>
-        ${canManageRecords() ? `<button class="icon-button" data-remove-patient="${patient.id}" title="Remover paciente" type="button">&times;</button>` : ""}
+        ${(isAdmin || currentSession?.id === patient.id) ? `<button class="secondary" data-edit-patient="${patient.id}" type="button">Editar</button>` : ""}
       </div>
     </article>
   `).join("") || `<p class="muted">${isAdmin ? "Nenhum paciente cadastrado." : "Nenhum paciente encontrado para esta cidade."}</p>`;
@@ -1721,14 +1794,6 @@ function renderPatientList() {
     });
   });
 
-  $$("[data-remove-patient]").forEach((button) => {
-    button.addEventListener("click", () => {
-      patients = patients.filter((patient) => patient.id !== button.dataset.removePatient);
-      saveStored("laserOralAidPatients", patients);
-      renderPatientModule();
-      renderSummary();
-    });
-  });
 }
 
 function renderProfessionalList() {
@@ -1743,11 +1808,12 @@ function renderProfessionalList() {
       <header>
         <div>
           <strong>${escapeHTML(item.name)}</strong>
-          <span class="muted">${escapeHTML(item.registry)} · login ${escapeHTML(item.username || "não definido")}</span>
+          <span class="muted">${escapeHTML(item.registry)} · ${escapeHTML(item.email || "e-mail protegido")}</span>
         </div>
         <span class="badge">${escapeHTML(item.city)}</span>
       </header>
       <dl>
+        <dt>Unidades</dt><dd>${escapeHTML(getProfessionalServiceNames(item).join(" · ") || "Não selecionadas")}</dd>
         <dt>Local</dt><dd>${escapeHTML(item.workplace || "Local de trabalho não informado")}</dd>
         <dt>Registro</dt><dd>${escapeHTML(item.registry)}</dd>
       </dl>
@@ -1762,15 +1828,7 @@ function renderProfessionalList() {
       const selected = professionals.find((item) => item.id === button.dataset.editProfessional);
       if (!selected) return;
       professional = selected;
-      saveStored("laserOralAidProfessional", professional);
-      const form = $("#professionalForm");
-      form.elements.id.value = selected.id || "";
-      form.elements.username.value = selected.username || "";
-      form.elements.password.value = selected.password || "";
-      form.elements.name.value = selected.name || "";
-      form.elements.registry.value = selected.registry || "";
-      form.elements.city.value = selected.city || "";
-      form.elements.workplace.value = selected.workplace || "";
+      setProfessionalForm(selected);
       setAuthMessage("Cadastro profissional carregado para edição.");
       openRegistrationPage("professional", true);
     });
@@ -1788,11 +1846,310 @@ function renderSummary() {
   $("#summaryCityCount").textContent = currentSession?.role === "admin" && !city ? professionals.length : city ? cityCount : 0;
 }
 
+function bindSchedule() {
+  $("#scheduleAccessBtn").addEventListener("click", () => activateView("patients"));
+  $("#availabilityForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const activeProfessional = getCurrentProfessional();
+    if (currentSession?.role !== "professional" || !activeProfessional) {
+      setScheduleMessage("Entre como profissional para publicar horários.");
+      return;
+    }
+    const professionalServices = getProfessionalServiceNames(activeProfessional);
+    if (!professionalServices.length) {
+      setScheduleMessage("Edite seu cadastro e selecione o serviço onde você atende.");
+      return;
+    }
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    if (!professionalServices.includes(data.serviceName)) {
+      setScheduleMessage("Selecione uma das unidades vinculadas ao seu cadastro.");
+      return;
+    }
+    if (data.date < localDateKey()) {
+      setScheduleMessage("Escolha uma data de hoje em diante.");
+      return;
+    }
+    if (timeToMinutes(data.end) <= timeToMinutes(data.start)) {
+      setScheduleMessage("O horário final deve ser posterior ao horário inicial.");
+      return;
+    }
+    if (timeToMinutes(data.end) - timeToMinutes(data.start) < Number(data.interval)) {
+      setScheduleMessage("A faixa informada precisa comportar pelo menos uma consulta.");
+      return;
+    }
+    const overlaps = availabilities.some((item) =>
+      item.professionalId === activeProfessional.id && item.date === data.date &&
+      timeToMinutes(data.start) < timeToMinutes(item.end) && timeToMinutes(data.end) > timeToMinutes(item.start)
+    );
+    if (overlaps) {
+      setScheduleMessage("Já existe uma faixa de horários que se sobrepõe a esse período.");
+      return;
+    }
+    const record = {
+      professionalId: activeProfessional.id,
+      serviceName: data.serviceName,
+      date: data.date,
+      start: data.start,
+      end: data.end,
+      interval: Number(data.interval)
+    };
+    setFormBusy(event.currentTarget, true);
+    try {
+      availabilities.push(await createRemoteAvailability(record));
+      setScheduleMessage("Horários publicados e sincronizados.");
+      renderSchedule();
+    } catch (error) {
+      setScheduleMessage(error.message);
+    } finally {
+      setFormBusy(event.currentTarget, false);
+    }
+  });
+
+  ["#bookingServiceSelect", "#bookingProfessionalSelect", "#bookingDateSelect"].forEach((selector) => {
+    $(selector).addEventListener("change", () => populateBookingSelectors(selector));
+  });
+
+  $("#bookingForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const patient = getCurrentPatient();
+    if (!patient) {
+      setScheduleMessage("Entre como paciente para confirmar o agendamento.");
+      return;
+    }
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const [availabilityId, time] = String(data.slot || "").split("|");
+    const availability = availabilities.find((item) => item.id === availabilityId);
+    const selectedProfessional = professionals.find((item) => item.id === data.professionalId);
+    const occupied = appointments.some((item) => item.availabilityId === availabilityId && item.time === time && item.status !== "cancelled");
+    const validSlot = availability && generateSlots(availability).includes(time);
+    if (!availability || !selectedProfessional || availability.professionalId !== selectedProfessional.id ||
+      availability.serviceName !== data.serviceName || availability.date !== data.date || availability.date < localDateKey() || !validSlot || occupied) {
+      setScheduleMessage("Este horário não está mais disponível. Escolha outro.");
+      renderSchedule();
+      return;
+    }
+    const record = {
+      availabilityId,
+      professionalId: selectedProfessional.id,
+      patientId: patient.id,
+      serviceName: availability.serviceName,
+      date: availability.date,
+      time,
+      notes: data.notes.trim()
+    };
+    setFormBusy(event.currentTarget, true);
+    try {
+      appointments.push(await createRemoteAppointment(record));
+      event.currentTarget.elements.notes.value = "";
+      setScheduleMessage("Agendamento confirmado e sincronizado.");
+      renderSchedule();
+    } catch (error) {
+      setScheduleMessage(error.message.includes("appointments_active_slot_idx")
+        ? "Este horário acabou de ser reservado. Escolha outro."
+        : error.message);
+      await refreshBackendData();
+      renderSchedule();
+    } finally {
+      setFormBusy(event.currentTarget, false);
+    }
+  });
+}
+
+function renderSchedule() {
+  if (!$("#scheduleView")) return;
+  const role = currentSession?.role;
+  const activeProfessional = getCurrentProfessional();
+  const patient = getCurrentPatient();
+  const hasSession = ["patient", "professional", "admin"].includes(role);
+  $("#scheduleAccessBtn").hidden = hasSession;
+  $("#availabilityForm").hidden = role !== "professional";
+  $("#bookingForm").hidden = role !== "patient";
+  $("#scheduleHelp").hidden = hasSession;
+  $("#scheduleRecords").hidden = !hasSession;
+
+  if (role === "professional" && activeProfessional) {
+    const professionalServices = getProfessionalServiceNames(activeProfessional);
+    $("#scheduleIntro").textContent = "Publique horários por unidade e acompanhe as reservas recebidas.";
+    $("#availabilityServiceLabel").textContent = professionalServices.length
+      ? `${professionalServices.length} ${professionalServices.length === 1 ? "unidade vinculada" : "unidades vinculadas"} ao seu cadastro.`
+      : "Selecione pelo menos uma unidade no seu cadastro antes de publicar horários.";
+    const availabilityServiceSelect = $("#availabilityServiceSelect");
+    const previousService = availabilityServiceSelect.value;
+    availabilityServiceSelect.innerHTML = optionList("Selecione uma unidade", professionalServices.map((name) => [name, name]));
+    if (professionalServices.includes(previousService)) availabilityServiceSelect.value = previousService;
+    const dateInput = $("#availabilityForm").elements.date;
+    dateInput.min = localDateKey();
+    if (!dateInput.value || dateInput.value < dateInput.min) dateInput.value = dateInput.min;
+  } else if (role === "patient" && patient) {
+    $("#scheduleIntro").textContent = `Olá, ${patient.name}. Escolha um horário publicado pelos profissionais da rede.`;
+    populateBookingSelectors();
+  } else if (role === "admin") {
+    $("#scheduleIntro").textContent = "Visualize todos os horários publicados e agendamentos deste dispositivo.";
+  } else {
+    $("#scheduleIntro").textContent = "Entre como paciente para agendar ou como profissional para publicar horários.";
+  }
+  renderAppointmentList();
+}
+
+function populateBookingSelectors(changedSelector = "") {
+  const serviceSelect = $("#bookingServiceSelect");
+  const professionalSelect = $("#bookingProfessionalSelect");
+  const dateSelect = $("#bookingDateSelect");
+  const slotSelect = $("#bookingSlotSelect");
+  const future = availabilities.filter((item) => item.date >= localDateKey());
+  const previousService = serviceSelect.value;
+  const servicesWithAvailability = [...new Set(future.map((item) => item.serviceName).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  serviceSelect.innerHTML = optionList("Selecione um serviço", servicesWithAvailability.map((name) => [name, name]));
+  if (servicesWithAvailability.includes(previousService)) serviceSelect.value = previousService;
+
+  const serviceName = serviceSelect.value;
+  const professionalIds = [...new Set(future.filter((item) => item.serviceName === serviceName).map((item) => item.professionalId))];
+  const availableProfessionals = professionalIds.map((id) => professionals.find((item) => item.id === id)).filter(Boolean);
+  const previousProfessional = professionalSelect.value;
+  professionalSelect.innerHTML = optionList("Selecione um profissional", availableProfessionals.map((item) => [item.id, `${item.name} · ${item.registry}`]));
+  if (changedSelector !== "#bookingServiceSelect" && availableProfessionals.some((item) => item.id === previousProfessional)) professionalSelect.value = previousProfessional;
+
+  const professionalId = professionalSelect.value;
+  const dates = [...new Set(future.filter((item) => item.professionalId === professionalId && item.serviceName === serviceName).map((item) => item.date))].sort();
+  const previousDate = dateSelect.value;
+  dateSelect.innerHTML = optionList("Selecione uma data", dates.map((date) => [date, formatScheduleDate(date)]));
+  if (changedSelector !== "#bookingProfessionalSelect" && dates.includes(previousDate)) dateSelect.value = previousDate;
+
+  const date = dateSelect.value;
+  const slotOptions = future
+    .filter((item) => item.professionalId === professionalId && item.serviceName === serviceName && item.date === date)
+    .flatMap((item) => generateSlots(item).map((time) => ({ item, time })))
+    .filter(({ item, time }) => !appointments.some((appointment) => appointment.availabilityId === item.id && appointment.time === time && appointment.status !== "cancelled"))
+    .sort((a, b) => a.time.localeCompare(b.time));
+  slotSelect.innerHTML = optionList("Selecione um horário", slotOptions.map(({ item, time }) => [`${item.id}|${time}`, time]));
+
+  const submit = $("#bookingForm").querySelector('button[type="submit"]');
+  submit.disabled = slotOptions.length === 0;
+}
+
+function renderAppointmentList() {
+  const list = $("#appointmentList");
+  const role = currentSession?.role;
+  const activeProfessional = getCurrentProfessional();
+  const patient = getCurrentPatient();
+  let visibleAppointments = appointments;
+  let visibleAvailability = availabilities;
+  if (role === "patient" && patient) {
+    visibleAppointments = appointments.filter((item) => item.patientId === patient.id);
+    visibleAvailability = [];
+    $("#scheduleRecordsTitle").textContent = "Meus agendamentos";
+  } else if (role === "professional" && activeProfessional) {
+    visibleAppointments = appointments.filter((item) => item.professionalId === activeProfessional.id);
+    visibleAvailability = availabilities.filter((item) => item.professionalId === activeProfessional.id);
+    $("#scheduleRecordsTitle").textContent = "Minha agenda";
+  } else if (role === "admin") {
+    $("#scheduleRecordsTitle").textContent = "Agenda da rede";
+  } else {
+    list.innerHTML = "";
+    return;
+  }
+  visibleAppointments.sort(compareScheduleItems);
+  visibleAvailability.sort(compareScheduleItems);
+  const availabilityCards = visibleAvailability.filter((item) => item.date >= localDateKey()).map((item) => {
+    const activeBookings = appointments.filter((appointment) => appointment.availabilityId === item.id && appointment.status !== "cancelled").length;
+    const totalSlots = generateSlots(item).length;
+    const owner = professionals.find((professionalItem) => professionalItem.id === item.professionalId);
+    const canRemove = role === "admin" || (role === "professional" && activeProfessional?.id === item.professionalId);
+    return `<article class="appointment-card availability-card">
+      <header><div><span class="appointment-type">Horários publicados</span><strong>${formatScheduleDate(item.date)} · ${item.start}–${item.end}</strong></div><span class="badge">${activeBookings}/${totalSlots} reservados</span></header>
+      <p>${escapeHTML(item.serviceName)}${role === "admin" && owner ? `<br>${escapeHTML(owner.name)}` : ""}</p>
+      ${canRemove ? `<div class="patient-actions"><button class="secondary" data-remove-availability="${item.id}" type="button">Remover faixa</button></div>` : ""}
+    </article>`;
+  });
+  const appointmentCards = visibleAppointments.map((item) => {
+    const appointmentPatient = patients.find((patientItem) => patientItem.id === item.patientId);
+    const appointmentProfessional = professionals.find((professionalItem) => professionalItem.id === item.professionalId);
+    const canCancel = item.status !== "cancelled" && (role === "admin" || patient?.id === item.patientId || activeProfessional?.id === item.professionalId);
+    return `<article class="appointment-card ${item.status === "cancelled" ? "is-cancelled" : ""}">
+      <header><div><span class="appointment-type">Consulta</span><strong>${formatScheduleDate(item.date)} · ${item.time}</strong></div><span class="badge ${item.status === "cancelled" ? "warn" : ""}">${item.status === "cancelled" ? "Cancelado" : "Confirmado"}</span></header>
+      <dl>
+        <dt>Serviço</dt><dd>${escapeHTML(item.serviceName)}</dd>
+        ${role !== "patient" ? `<dt>Paciente</dt><dd>${escapeHTML(appointmentPatient?.name || "Cadastro indisponível")}${appointmentPatient?.phone ? ` · ${escapeHTML(appointmentPatient.phone)}` : ""}</dd>` : ""}
+        ${role !== "professional" ? `<dt>Profissional</dt><dd>${escapeHTML(appointmentProfessional?.name || "Cadastro indisponível")}</dd>` : ""}
+        <dt>Motivo</dt><dd>${escapeHTML(item.notes || "Não informado")}</dd>
+      </dl>
+      ${canCancel ? `<div class="patient-actions"><button class="secondary" data-cancel-appointment="${item.id}" type="button">Cancelar agendamento</button></div>` : ""}
+    </article>`;
+  });
+  list.innerHTML = [...availabilityCards, ...appointmentCards].join("") || `<p class="muted">Nenhum horário ou agendamento encontrado.</p>`;
+  $$('[data-cancel-appointment]').forEach((button) => button.addEventListener("click", async () => {
+    try {
+      const updated = await cancelRemoteAppointment(button.dataset.cancelAppointment);
+      appointments = appointments.map((item) => item.id === updated.id ? updated : item);
+      setScheduleMessage("Agendamento cancelado e sincronizado.");
+      renderSchedule();
+    } catch (error) {
+      setScheduleMessage(error.message);
+    }
+  }));
+  $$('[data-remove-availability]').forEach((button) => button.addEventListener("click", async () => {
+    const hasBookings = appointments.some((item) => item.availabilityId === button.dataset.removeAvailability && item.status !== "cancelled");
+    if (hasBookings) {
+      setScheduleMessage("Cancele os agendamentos ativos desta faixa antes de removê-la.");
+      return;
+    }
+    try {
+      await deleteRemoteAvailability(button.dataset.removeAvailability);
+      availabilities = availabilities.filter((item) => item.id !== button.dataset.removeAvailability);
+      setScheduleMessage("Faixa de horários removida do Supabase.");
+      renderSchedule();
+    } catch (error) {
+      setScheduleMessage(error.message);
+    }
+  }));
+}
+
+function generateSlots(availability) {
+  const slots = [];
+  const end = timeToMinutes(availability.end);
+  const interval = Number(availability.interval) || 30;
+  for (let minutes = timeToMinutes(availability.start); minutes + interval <= end; minutes += interval) {
+    slots.push(`${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`);
+  }
+  return slots;
+}
+
+function timeToMinutes(value) {
+  const [hours, minutes] = String(value || "0:0").split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+function localDateKey() {
+  const now = new Date();
+  const offset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - offset).toISOString().slice(0, 10);
+}
+
+function formatScheduleDate(value) {
+  if (!value) return "Data não informada";
+  return new Intl.DateTimeFormat("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(`${value}T12:00:00`));
+}
+
+function compareScheduleItems(a, b) {
+  return `${a.date}${a.time || a.start || ""}`.localeCompare(`${b.date}${b.time || b.start || ""}`);
+}
+
+function optionList(placeholder, entries) {
+  return [`<option value="">${escapeHTML(placeholder)}</option>`, ...entries.map(([value, label]) => `<option value="${escapeHTML(value)}">${escapeHTML(label)}</option>`)].join("");
+}
+
+function setScheduleMessage(message) {
+  $("#scheduleMessage").textContent = message;
+}
+
 function setPatientForm(patient) {
   const form = $("#patientForm");
   form.elements.id.value = patient.id || "";
-  form.elements.username.value = patient.username || "";
-  form.elements.password.value = patient.password || "";
+  form.elements.email.value = patient.email || "";
+  form.elements.email.readOnly = true;
+  form.elements.password.value = "";
+  form.elements.password.required = false;
+  form.elements.password.closest("label").hidden = true;
   form.elements.name.value = patient.name || "";
   form.elements.phone.value = patient.phone || "";
   form.elements.age.value = patient.age || "";
@@ -1813,12 +2170,26 @@ function setPatientForm(patient) {
 function setProfessionalForm(item) {
   const form = $("#professionalForm");
   form.elements.id.value = item.id || "";
-  form.elements.username.value = item.username || "";
-  form.elements.password.value = item.password || "";
+  form.elements.email.value = item.email || "";
+  form.elements.email.readOnly = true;
+  form.elements.password.value = "";
+  form.elements.password.required = false;
+  form.elements.password.closest("label").hidden = true;
   form.elements.name.value = item.name || "";
   form.elements.registry.value = item.registry || "";
   form.elements.city.value = item.city || "";
   form.elements.workplace.value = item.workplace || "";
+  const serviceNames = getProfessionalServiceNames(item);
+  const knownServices = new Set(services.filter((service) => service.laser).map((service) => service.name));
+  populateProfessionalServices();
+  serviceNames.filter((name) => !knownServices.has(name)).forEach((name) => {
+    $("#professionalServiceChecklist").insertAdjacentHTML("beforeend", serviceCheckboxHTML(name));
+  });
+  form.querySelectorAll('[name="serviceNames"]').forEach((input) => {
+    input.checked = serviceNames.includes(input.value);
+  });
+  resetNewServiceFields();
+  $("#newServiceMessage").textContent = "A unidade será adicionada à Rede de atendimento e ficará marcada neste cadastro.";
   $("#professionalFormTitle").textContent = "Editar cadastro profissional";
   $("#saveProfessionalBtn").textContent = "Atualizar meu cadastro";
 }
@@ -1826,7 +2197,13 @@ function setProfessionalForm(item) {
 function resetProfessionalForm() {
   const form = $("#professionalForm");
   form.reset();
+  form.elements.email.readOnly = false;
+  form.elements.password.required = true;
+  form.elements.password.closest("label").hidden = false;
+  populateProfessionalServices();
+  resetNewServiceFields();
   form.elements.id.value = "";
+  $("#newServiceMessage").textContent = "A unidade será adicionada à Rede de atendimento e ficará marcada neste cadastro.";
   $("#professionalFormTitle").textContent = "Cadastro profissional";
   $("#saveProfessionalBtn").textContent = "Salvar profissional";
 }
@@ -1834,6 +2211,9 @@ function resetProfessionalForm() {
 function resetPatientForm() {
   const form = $("#patientForm");
   form.reset();
+  form.elements.email.readOnly = false;
+  form.elements.password.required = true;
+  form.elements.password.closest("label").hidden = false;
   form.elements.id.value = "";
   $("#patientFormTitle").textContent = "Cadastro para acompanhamento";
   $("#savePatientBtn").textContent = "Salvar paciente";
@@ -1854,12 +2234,16 @@ function getCurrentProfessional() {
   return professional && professionals.some((item) => item.id === professional.id) ? professional : null;
 }
 
-function isAdminSession(session) {
-  return session?.role === "admin" && session.username === adminProfile.username;
+function getProfessionalServiceNames(item) {
+  if (!item) return [];
+  if (Array.isArray(item.serviceNames)) return item.serviceNames.filter(Boolean);
+  return item.serviceName ? [item.serviceName] : [];
 }
 
-function canManageRecords() {
-  return currentSession?.role === "professional" || currentSession?.role === "admin";
+function resetNewServiceFields() {
+  ["#newProfessionalServiceName", "#newProfessionalServiceCity", "#newProfessionalServiceState", "#newProfessionalServiceAddress", "#newProfessionalServicePhone"]
+    .forEach((selector) => { $(selector).value = ""; });
+  $("#newProfessionalServiceType").value = "SUS";
 }
 
 function setAuthMessage(message) {
@@ -1939,8 +2323,8 @@ function saveStored(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-function createId() {
-  return globalThis.crypto?.randomUUID?.() || `patient-${Date.now()}-${Math.round(Math.random() * 10000)}`;
+function createId(prefix = "record") {
+  return globalThis.crypto?.randomUUID?.() || `${prefix}-${Date.now()}-${Math.round(Math.random() * 10000)}`;
 }
 
 function formatPhone(value) {
@@ -1960,4 +2344,10 @@ function escapeHTML(value) {
     .replaceAll("'", "&#039;");
 }
 
-init();
+init().catch((error) => {
+  console.error(error);
+  const status = document.querySelector("#syncStatus");
+  const message = document.querySelector("#authMessage");
+  if (status) status.textContent = "Falha na sincronização";
+  if (message) message.textContent = `Não foi possível conectar ao Supabase: ${error.message}`;
+});

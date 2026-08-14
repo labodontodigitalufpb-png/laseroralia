@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0b6b75" />
     <title>Laser Oral Aid</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=27" />
+    <link rel="stylesheet" href="styles.css?v=35" />
   </head>
   <body>
     <div class="app-shell">
@@ -23,6 +23,7 @@
           <button class="nav-item active" data-view="home" type="button">Início</button>
           <button class="nav-item" data-view="patients" type="button">Acesso</button>
           <button class="nav-item" data-view="tracking" type="button">Acompanhamento</button>
+          <button class="nav-item" data-view="schedule" type="button">Agenda</button>
           <button class="nav-item" data-view="protocols" type="button">Protocolos</button>
           <button class="nav-item" data-view="simulator" type="button">Simulador</button>
           <button class="nav-item" data-view="calculator" type="button">Calculadoras</button>
@@ -229,7 +230,7 @@
           <section class="panel auth-panel">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Acesso seguro local</p>
+                <p class="eyebrow">Acesso seguro com Supabase</p>
                 <h2>Entrar como paciente, profissional ou admin</h2>
               </div>
               <div class="session-box" id="sessionBox"></div>
@@ -237,8 +238,8 @@
             <div class="auth-grid">
               <form class="form-grid stacked-form" id="patientLoginForm">
                 <h3>Acesso do paciente</h3>
-                <label>Login
-                  <input name="username" autocomplete="username" placeholder="Login do paciente" required />
+                <label>E-mail
+                  <input name="email" autocomplete="email" inputmode="email" placeholder="paciente@exemplo.com" type="email" required />
                 </label>
                 <label>Senha
                   <input name="password" autocomplete="current-password" type="password" placeholder="Senha" required />
@@ -248,8 +249,8 @@
               </form>
               <form class="form-grid stacked-form" id="professionalLoginForm">
                 <h3>Acesso do profissional</h3>
-                <label>Login
-                  <input name="username" autocomplete="username" placeholder="Login profissional" required />
+                <label>E-mail
+                  <input name="email" autocomplete="email" inputmode="email" placeholder="profissional@exemplo.com" type="email" required />
                 </label>
                 <label>Senha
                   <input name="password" autocomplete="current-password" type="password" placeholder="Senha" required />
@@ -259,8 +260,8 @@
               </form>
               <form class="form-grid stacked-form" id="adminLoginForm">
                 <h3>Acesso admin</h3>
-                <label>Login
-                  <input name="username" autocomplete="username" placeholder="Login admin" required />
+                <label>E-mail
+                  <input name="email" autocomplete="email" inputmode="email" placeholder="admin@exemplo.com" type="email" required />
                 </label>
                 <label>Senha
                   <input name="password" autocomplete="current-password" type="password" placeholder="Senha" required />
@@ -285,23 +286,22 @@
                 <button class="icon-button" id="closePasswordRecoveryBtn" aria-label="Fechar recuperação de senha" type="button">&times;</button>
               </div>
               <form class="form-grid" id="passwordRecoveryForm">
-                <input name="role" type="hidden" />
-                <label>Login
-                  <input name="username" autocomplete="username" required />
-                </label>
-                <label><span id="recoveryIdentifierLabel">Nome completo</span>
-                  <input name="identifier" required />
-                </label>
-                <label>Nova senha
-                  <input name="newPassword" autocomplete="new-password" minlength="6" type="password" required />
-                </label>
-                <label>Confirmar nova senha
-                  <input name="confirmPassword" autocomplete="new-password" minlength="6" type="password" required />
+                <label>E-mail do acesso
+                  <input name="email" autocomplete="email" inputmode="email" type="email" required />
                 </label>
                 <div class="form-actions">
-                  <button class="primary" type="submit">Redefinir senha</button>
+                  <button class="primary" type="submit">Enviar link de recuperação</button>
                   <button class="secondary" id="cancelPasswordRecoveryBtn" type="button">Cancelar</button>
                 </div>
+              </form>
+              <form class="form-grid" id="passwordUpdateForm" hidden>
+                <label>Nova senha
+                  <input name="newPassword" autocomplete="new-password" minlength="8" type="password" required />
+                </label>
+                <label>Confirmar nova senha
+                  <input name="confirmPassword" autocomplete="new-password" minlength="8" type="password" required />
+                </label>
+                <button class="primary" type="submit">Salvar nova senha</button>
               </form>
             </section>
             <p class="auth-message" id="authMessage"></p>
@@ -317,11 +317,11 @@
               </div>
               <form class="form-grid stacked-form" id="patientForm">
                 <input name="id" type="hidden" />
-                <label>Login do paciente
-                  <input name="username" autocomplete="username" placeholder="Ex.: maria.silva" required />
+                <label>E-mail do paciente
+                  <input name="email" autocomplete="email" inputmode="email" placeholder="maria@exemplo.com" type="email" required />
                 </label>
                 <label>Senha
-                  <input name="password" autocomplete="new-password" type="password" placeholder="Crie uma senha" required />
+                  <input name="password" autocomplete="new-password" minlength="8" type="password" placeholder="Mínimo de 8 caracteres" required />
                 </label>
                 <label>Nome completo
                   <input name="name" placeholder="Nome do paciente" required />
@@ -374,11 +374,11 @@
               </div>
               <form class="form-grid stacked-form" id="professionalForm">
                 <input name="id" type="hidden" />
-                <label>Login profissional
-                  <input name="username" autocomplete="username" placeholder="Ex.: cro12345" required />
+                <label>E-mail profissional
+                  <input name="email" autocomplete="email" inputmode="email" placeholder="profissional@exemplo.com" type="email" required />
                 </label>
                 <label>Senha
-                  <input name="password" autocomplete="new-password" type="password" placeholder="Crie uma senha" required />
+                  <input name="password" autocomplete="new-password" minlength="8" type="password" placeholder="Mínimo de 8 caracteres" required />
                 </label>
                 <label>Nome do profissional
                   <input name="name" placeholder="Nome completo" required />
@@ -392,6 +392,45 @@
                 <label>Local de trabalho
                   <input name="workplace" placeholder="Clinica, UBS, universidade..." />
                 </label>
+                <div class="form-field">
+                  <span class="field-label">Unidades que ofertam a laserterapia</span>
+                  <span class="service-checklist" id="professionalServiceChecklist" role="group" aria-label="Unidades que ofertam a laserterapia"></span>
+                  <small class="field-help">Marque todas as unidades em que o profissional oferece atendimento.</small>
+                </div>
+                <section class="new-service-card" aria-labelledby="newServiceTitle">
+                  <header class="new-service-header">
+                    <span class="new-service-icon" aria-hidden="true">+</span>
+                    <div>
+                      <h3 id="newServiceTitle">Cadastrar nova unidade</h3>
+                      <p>Inclua uma unidade que ainda não aparece na Rede de atendimento.</p>
+                    </div>
+                  </header>
+                  <div class="new-service-fields">
+                    <label class="new-service-name">Nome da unidade
+                      <input id="newProfessionalServiceName" placeholder="Clínica, UBS, hospital ou universidade" />
+                    </label>
+                    <label class="new-service-type">Tipo de atendimento
+                      <select id="newProfessionalServiceType">
+                        <option value="SUS">SUS</option>
+                        <option value="Privado">Privado</option>
+                      </select>
+                    </label>
+                    <label class="new-service-address">Endereço
+                      <input id="newProfessionalServiceAddress" autocomplete="street-address" placeholder="Rua, número e bairro" />
+                    </label>
+                    <label class="new-service-city">Cidade
+                      <input id="newProfessionalServiceCity" autocomplete="address-level2" placeholder="Ex.: João Pessoa" />
+                    </label>
+                    <label class="new-service-state">UF
+                      <input id="newProfessionalServiceState" autocomplete="address-level1" inputmode="text" maxlength="2" pattern="[A-Za-z]{2}" placeholder="PB" />
+                    </label>
+                    <label class="new-service-phone">Telefone <span>(opcional)</span>
+                      <input id="newProfessionalServicePhone" inputmode="tel" placeholder="(00) 00000-0000" />
+                    </label>
+                  </div>
+                  <button class="add-unit-button" id="addProfessionalServiceBtn" type="button"><span aria-hidden="true">+</span> Adicionar unidade à rede</button>
+                  <small class="new-service-message" id="newServiceMessage">Após adicionar, a unidade ficará marcada automaticamente neste cadastro.</small>
+                </section>
                 <button class="primary" id="saveProfessionalBtn" type="submit">Salvar profissional</button>
               </form>
               <div class="professional-profile" id="professionalProfile"></div>
@@ -434,6 +473,93 @@
             </div>
           </section>
           <div id="trackingContent"></div>
+        </section>
+
+        <section class="view" id="scheduleView">
+          <section class="schedule-hero panel">
+            <div>
+              <p class="eyebrow">Agendamento de atendimento</p>
+              <h2>Agenda de laserterapia</h2>
+              <p class="muted" id="scheduleIntro">Entre como paciente ou profissional para usar a agenda.</p>
+            </div>
+            <button class="secondary" id="scheduleAccessBtn" type="button">Ir para o acesso</button>
+          </section>
+
+          <div class="layout two-col schedule-layout">
+            <form class="panel form-grid stacked-form" id="availabilityForm" hidden>
+              <div>
+                <p class="eyebrow">Área do profissional</p>
+                <h2>Disponibilizar horários</h2>
+                <p class="muted" id="availabilityServiceLabel"></p>
+              </div>
+              <label>Data de atendimento
+                <input name="date" type="date" required />
+              </label>
+              <label>Unidade deste atendimento
+                <select name="serviceName" id="availabilityServiceSelect" required></select>
+              </label>
+              <div class="schedule-time-grid">
+                <label>Início
+                  <input name="start" type="time" value="08:00" required />
+                </label>
+                <label>Fim
+                  <input name="end" type="time" value="12:00" required />
+                </label>
+                <label>Duração da consulta
+                  <select name="interval">
+                    <option value="20">20 minutos</option>
+                    <option value="30" selected>30 minutos</option>
+                    <option value="45">45 minutos</option>
+                    <option value="60">60 minutos</option>
+                  </select>
+                </label>
+              </div>
+              <button class="primary" type="submit">Publicar horários</button>
+            </form>
+
+            <form class="panel form-grid stacked-form" id="bookingForm" hidden>
+              <div>
+                <p class="eyebrow">Área do paciente</p>
+                <h2>Escolher atendimento</h2>
+              </div>
+              <label>Serviço
+                <select name="serviceName" id="bookingServiceSelect" required></select>
+              </label>
+              <label>Profissional
+                <select name="professionalId" id="bookingProfessionalSelect" required></select>
+              </label>
+              <label>Data
+                <select name="date" id="bookingDateSelect" required></select>
+              </label>
+              <label>Horário disponível
+                <select name="slot" id="bookingSlotSelect" required></select>
+              </label>
+              <label>Motivo da consulta (opcional)
+                <input name="notes" maxlength="120" placeholder="Ex.: avaliação de mucosite" />
+              </label>
+              <button class="primary" type="submit">Confirmar agendamento</button>
+            </form>
+
+            <section class="panel schedule-help" id="scheduleHelp">
+              <h2>Como funciona</h2>
+              <ol class="clean-list">
+                <li>O profissional associa seu cadastro a um serviço da rede.</li>
+                <li>Ele publica dias e faixas de horários disponíveis.</li>
+                <li>O paciente escolhe o serviço, profissional e horário livre.</li>
+              </ol>
+            </section>
+          </div>
+
+          <section class="panel schedule-records" id="scheduleRecords" hidden>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Atendimentos e disponibilidades</p>
+                <h2 id="scheduleRecordsTitle">Meus agendamentos</h2>
+              </div>
+            </div>
+            <p class="auth-message" id="scheduleMessage" role="status"></p>
+            <div class="appointment-list" id="appointmentList"></div>
+          </section>
         </section>
 
         <section class="view" id="calculatorView">
@@ -526,6 +652,6 @@
       </main>
     </div>
 
-    <script src="app.js?v=27" type="module"></script>
+    <script src="app.js?v=36" type="module"></script>
   </body>
 </html>
