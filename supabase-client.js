@@ -202,10 +202,11 @@ export async function deleteEducationalMaterial(material) {
 }
 
 export async function signIn(email, password, expectedRole) {
-  assertNoError(
-    await supabase.auth.signInWithPassword({ email: email.trim(), password }),
-    "Não foi possível entrar."
-  );
+  const result = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+  if (result.error?.code === "invalid_credentials") {
+    throw new Error("E-mail ou senha incorretos. Use ‘Esqueci minha senha’ para recuperar o acesso.");
+  }
+  assertNoError(result, "Não foi possível entrar.");
   const account = await getAccount();
   if (!account || (expectedRole && account.role !== expectedRole)) {
     await supabase.auth.signOut();

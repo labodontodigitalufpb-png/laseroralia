@@ -1533,7 +1533,12 @@ function bindPatientModule() {
 }
 
 function openPasswordRecovery(role) {
-  const loginForm = role === "patient" ? $("#patientLoginForm") : $("#professionalLoginForm");
+  const loginForms = {
+    patient: "#patientLoginForm",
+    professional: "#professionalLoginForm",
+    admin: "#adminLoginForm"
+  };
+  const loginForm = $(loginForms[role] || "#patientLoginForm");
   const form = $("#passwordRecoveryForm");
   form.reset();
   form.hidden = false;
